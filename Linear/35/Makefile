@@ -1,12 +1,16 @@
+ODIR=obj
+BDIR=bin
+SRCDIR=src
+
 CC=gcc
+FLAGS=-Wall -o2 -g
 
-all: queue.o main.bin
+all: queue.o linear_task35.exe
 
-queue.o: src/queue.c src/queue.h
-	$(CC) -c -g -Isrc/ $< -o obj/$@ 
+linear_task35.exe: $(SRCDIR)/main.c $(ODIR)/queue.o
+	mkdir -p $(BDIR)
+	$(CC) -o $(BDIR)/$@ $^
 
-main.bin: obj/queue.o
-	$(CC) src/main.c -g -o bin/$@ $^
-
-clean:
-	rm -f *.o 
+queue.o: $(SRCDIR)/queue.c $(SRCDIR)/queue.h
+	mkdir -p $(ODIR)
+	$(CC) $(FLAGS) -o $(ODIR)/$@ -c $<

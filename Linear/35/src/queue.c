@@ -24,7 +24,7 @@ S_Queue *S_Queue_init()
     return queue;
 }
 
-void S_Queue_push(S_Queue *queue, S_Node *node)
+void S_Queue_push(S_Queue *queue, S_Node *node) // 2n + 3
 {
     if (!queue->size) // 1
     {
@@ -34,21 +34,22 @@ void S_Queue_push(S_Queue *queue, S_Node *node)
     else
     {
         S_Node *tail = queue->head; // 2
-        while (tail->prev) { // 1
+        while (tail->prev) { 
             tail = tail->prev; // 2
             queue->N_OP += 3;
-        } // size - 1
+        } // 2 * (n - 1)
 
         tail->prev = node; // 2
         node->prev = NULL; // 2
         queue->N_OP += 6;
-    }
-    queue->size++;
+    } // 2n - 2 + 2 + 2 = 2n + 2
+
+    queue->size++; // 1
 
     queue->N_OP += 2;
 }
 
-S_Node *S_Queue_pop(S_Queue *queue)
+S_Node *S_Queue_pop(S_Queue *queue) // 9
 {
     if (!queue->size) 
     {
@@ -81,22 +82,22 @@ void S_Queue_print(S_Queue *queue)
     }
 }
 
-size_t S_Queue_len(S_Queue *queue)
+size_t S_Queue_len(S_Queue *queue) // 1
 {
     return queue->size;
 }
 
-void S_Queue_rotate(S_Queue *queue)
+void S_Queue_rotate(S_Queue *queue) // 2n + 14
 {
-    if(queue->size < 2) return;
-    S_Queue_push(queue, S_Queue_pop(queue));
+    if(queue->size < 2) return; // 2
+    S_Queue_push(queue, S_Queue_pop(queue)); // 9 + 2n + 3 = 2n + 12
 }
 
-const S_Node *S_Queue_peek(S_Queue *queue, size_t pos)
+const S_Node *S_Queue_peek(S_Queue *queue, size_t pos) // 2k + 2
 {
     S_Node *node = queue->head; // 2
     queue->N_OP += 2;
-    while (pos--) // 1
+    while (pos--) // 2k
     {
         node = node->prev; // 2
         queue->N_OP += 3;

@@ -1,4 +1,5 @@
 from typing import Optional, Generic, TypeVar
+from random import randint, shuffle
 
 from typing import Optional
 
@@ -116,3 +117,22 @@ class Tree(Generic[VT]):
 
     def traverse_preorder(self) -> list[Node[VT]]:
         return self._traverse_preorder(self._root, [])
+
+if __name__ == "__main__":
+    tree_a = Tree[int]()
+    tree_b = Tree[int]()
+    
+    for _ in range(15):
+        v = randint(-99, 100)
+        tree_a.insert(v)
+        
+        if randint(0, 99) % 10 >= 5:
+            tree_b.insert(v)
+            
+    print("Дерево А в обратном порядке: " + str(tree_a.traverse_postorder()))
+    print("Дерево B в симметричном порядке: " + str(tree_b.traverse_inorder()))
+
+    for v in tree_b.traverse_inorder():
+        tree_a.remove(v.value)
+    
+    print("Дерево А после удаления элементов дерева B: " + str(tree_a.traverse_inorder()))

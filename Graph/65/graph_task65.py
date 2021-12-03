@@ -1,5 +1,6 @@
 T_adj_matrix = list[list[int]]
-T_graph_paths = list[list[int]]
+GraphPath = list[int]
+
 
 def load_matrix(i_filename: str) -> T_adj_matrix:
     with open(i_filename, 'r') as f:
@@ -7,38 +8,62 @@ def load_matrix(i_filename: str) -> T_adj_matrix:
 
     return adj_matrix
 
-def find_paths_by_len(adj_matrix: T_adj_matrix, path_len: int) -> T_graph_paths:
-
-    def _dfs(node: int, known_nodes: set[int], len_credit: int):
-        paths = []
-        for dest_node, edge_len in enumerate(adj_matrix[node]):
+def get_cycles_with_fix_len(path_len: int, matrix: T_adj_matrix) -> list[GraphPath]:
+    
+    def algo(node: int, len_credit: int, known_nodes: set[int]) -> list[GraphPath]:
+        paths: list[list[int]] = []
+        
+        for other_node, edge_len in enumerate(matrix[node]):
             
-            if len_credit - edge_len < 0 or edge_len == 0:
+            if not edge_len:
                 continue
             
-            if len_credit - edge_len == 0:
-                paths.append([node, dest_node])
-                continue
-            
-            if dest_node in known_nodes:
-                pass
-            
-            a = _dfs(dest_node, known_nodes | set([dest_node]), len_credit - edge_len)
-            
-            paths.extend([[node, *path] for path in a])
+            if not other_node in known_nodes and len_credit - edge_len > 0:
+                _known_nodes = known_nodes.copy()
+                _known_nodes.add(other_node)
+                _paths = algo(other_node, len_credit - edge_len, _known_nodes)
+                paths.extend([node, *path] for path in _paths if _paths) 
+                
+            elif other_node in known_nodes and len_credit - edge_len == 0:
+                paths.append([node, other_node])
 
-        return paths if paths else [[node]]
+        return paths
     
-    paths = []
-    for node in range(len(adj_matrix)):
-        paths.extend(_dfs(node, set([node]), path_len))
+    cycles = []
+    for i in range(len(matrix)):
+        cycles.extend(algo(i, path_len, set([i])))
+        
+    return cycles
+
+if __name__ == '__main__':
     
-    return paths
+    import sys
+    
+    def param_to_cycle_len(param: str) -> int:
+        if not param.isdigit():
+            raise Exception("Введена длина цикла не являющаяся числом!")
+        
+        cycle_len = int(param)
+        
+        if cycle_len < 3:
+            raise Exception("Длина цикла не может быть меньше 3!")
+        
+        return cycle_len
 
+    matrix_file = 'graph_matrix.txt'
+    
+    if len(sys.argv) == 2:
+       cycle_len = param_to_cycle_len(sys.argv[1])
+        
+    elif len(sys.argv) == 3:
+        matrix_file = sys.argv[1]
+        cycle_len = param_to_cycle_len(sys.argv[2])
+    
+    else:
+        raise Exception("Неверное количество аргументов!")
+    
 
-def find_cycles(paths: T_graph_paths):
-    return [path for path in paths if path[0] == path[-1]]
+    adj_matrix = load_matrix(matrix_file)
+    cycles = get_cycles_with_fix_len(cycle_len, adj_matrix)
 
-adj_matrix = load_matrix('graph_matrix.txt')
-paths = find_paths_by_len(adj_matrix, 4)
-print(paths)
+    print(f"Циклы длины {cycle_len}: " + ", ".join(["->".join(map(str, cycle)) for cycle in cycles]))

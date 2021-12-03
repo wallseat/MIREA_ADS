@@ -1,15 +1,16 @@
-ODIR=./obj
-BDIR=./bin
-SRCDIR=./src
+ODIR=obj
+BDIR=bin
+SRCDIR=src
 
 CC=gcc
 FLAGS=-Wall -o2 -g
 
-all=tree.o main.exe
+all: tree.o tree_task35.exe
 
-main.exe: $(SRCDIR)/main.c tree.o
-	$(CC) -o $(BDIR)/$@ $(ODIR)/tree.o $<
+tree_task35.exe: $(SRCDIR)/main.c $(ODIR)/tree.o
+	mkdir -p $(BDIR)
+	$(CC) -o $(BDIR)/$@ $^
 
 tree.o: $(SRCDIR)/tree.c $(SRCDIR)/tree.h 
-	$(CC) $(FLAGS) -c -o $(ODIR)/$@ $<
-
+	mkdir -p $(ODIR)
+	$(CC) $(FLAGS) -o $(ODIR)/$@  -c $<
