@@ -17,55 +17,55 @@ class Node(Generic[VT]):
     def __repr__(self):
         return str(self.value)
          
-class Tree(Generic[VT]):
+class BST(Generic[VT]):
     _root: Optional[Node[VT]]
     
     def __init__(self):
         self._root = None
     
-    @staticmethod
-    def _find(root: Node[VT], value: VT):
+    def _find(self, root: Node[VT], value: VT):
         if root is None or root.value == value:
             return root
+        
         elif value < root.value:
-            return Tree._find(root.left, value)
+            return self._find(root.left, value)
+        
         else:
-            return Tree._find(root.right, value)
+            return self._find(root.right, value)
     
     def find(self, value):
         return self._find(self._root, value)
     
-    @staticmethod
-    def _insert(root: Node[VT], value: VT):
+    def _insert(self, root: Node[VT], value: VT):
         if root is None:
             return Node(value)
+        
         if value < root.value:
-            root.left = Tree._insert(root.left, value)
+            root.left = self._insert(root.left, value)
+            
         elif value > root.value:
-            root.right = Tree._insert(root.right, value)
+            root.right = self._insert(root.right, value)
         
         return root
     
     def insert(self, value: VT):
         self._root = self._insert(self._root, value)
     
-    @staticmethod
-    def _find_min(root: Node[VT]):
+    def _find_min(self, root: Node[VT]):
         if root.left is not None:
-            return Tree._find_min(root.left)
+            return self._find_min(root.left)
         else:
             return root
     
-    @staticmethod
-    def _remove(root: Node[VT], value: VT):
+    def _remove(self, root: Node[VT], value: VT):
         if root is None:
             return None
     
         if value < root.value:
-            root.left = Tree._remove(root.left, value)
+            root.left = self._remove(root.left, value)
             return root
         elif value > root.value:
-            root.right = Tree._remove(root.right, value)
+            root.right = self._remove(root.right, value)
             return root
         
         if root.left is None:
@@ -73,31 +73,29 @@ class Tree(Generic[VT]):
         elif root.right is None:
             return root.left
         else:
-            min_value = Tree._find_min(root.right).value
+            min_value = self._find_min(root.right).value
             root.value = min_value
-            root.right = Tree._remove(root.right, min_value)
+            root.right = self._remove(root.right, min_value)
             return root
         
     def remove(self, value: VT):
         self._root = self._remove(self._root, value)
     
-    @staticmethod
-    def _traverse_inorder(root: Node[VT], nodes_list: list[Node[VT]]):
+    def _traverse_inorder(self, root: Node[VT], nodes_list: list[Node[VT]]):
         if root is not None:
-            Tree._traverse_inorder(root.left, nodes_list)
+            self._traverse_inorder(root.left, nodes_list)
             nodes_list.append(root)
-            Tree._traverse_inorder(root.right, nodes_list)
+            self._traverse_inorder(root.right, nodes_list)
             
         return nodes_list
     
     def traverse_inorder(self) -> list[Node[VT]]:
         return self._traverse_inorder(self._root, [])
     
-    @staticmethod
-    def _traverse_postorder(root: Node[VT], nodes_list: list[Node[VT]]):
+    def _traverse_postorder(self, root: Node[VT], nodes_list: list[Node[VT]]):
         if root is not None:
-            Tree._traverse_inorder(root.left, nodes_list)
-            Tree._traverse_inorder(root.right, nodes_list)
+            self._traverse_inorder(root.left, nodes_list)
+            self._traverse_inorder(root.right, nodes_list)
             nodes_list.append(root)
             
         return nodes_list
@@ -105,12 +103,11 @@ class Tree(Generic[VT]):
     def traverse_postorder(self) -> list[Node[VT]]:
         return self._traverse_postorder(self._root, [])
     
-    @staticmethod
-    def _traverse_preorder(root: Node[VT], nodes_list: list[Node[VT]]):
+    def _traverse_preorder(self, root: Node[VT], nodes_list: list[Node[VT]]):
         if root is not None:
             nodes_list.append(root)
-            Tree._traverse_inorder(root.left, nodes_list)
-            Tree._traverse_inorder(root.right, nodes_list) 
+            self._traverse_inorder(root.left, nodes_list)
+            self._traverse_inorder(root.right, nodes_list) 
             
         return nodes_list
 
