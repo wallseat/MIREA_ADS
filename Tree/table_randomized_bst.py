@@ -1,4 +1,4 @@
-from typing import Generic, TypeVar, Optional
+from typing import Generic, TypeVar, Optional, List
 import random
 
 VT = TypeVar("VT")
@@ -16,9 +16,9 @@ class Node(Generic[VT]):
         return str(self.value)
 
 class RandomizedBST(Generic[VT]):
-    _nodes: list[Node[VT]]
-    _left: list[Node[VT]]
-    _right: list[Node[VT]]
+    _nodes: List[Node[VT]]
+    _left: List[int]
+    _right: List[int]
     _root: int
 
     def __init__(self):
@@ -37,12 +37,13 @@ class RandomizedBST(Generic[VT]):
         elif value < self._nodes[root].value:
             return self._find(self._left[root], value)
         
-        elif value > self._nodes[root].value:
+        else:
             return self._find(self._right[root], value)
         
     def find(self, value: VT) -> Optional[Node[VT]]:
-        return self._nodes.get(self._find(self._root, value), None)
-
+        index = self._find(self._root, value)
+        return self._nodes[index] if index is not None else None
+    
     def _size(self, root: int) -> int:
         return self._nodes[root].size if root is not None else 0
 
