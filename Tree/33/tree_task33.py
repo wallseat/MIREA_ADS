@@ -20,7 +20,7 @@ class Node(Generic[VT]):
     def __repr__(self):
         return str(self.value)
 
-class RandomizedBST:
+class RandomizedBST(Generic[VT]):
     _root: Optional[Node[VT]]
 
     def __init__(self):
@@ -103,7 +103,6 @@ class RandomizedBST:
     def insert(self, value: VT):
         self._root = self._insert(self._root, value)
 
-
     def _join(self, tree_min: Node[VT], tree_max: Node[VT]) -> Node[VT]:
         if tree_min is None:
             return tree_max
@@ -163,8 +162,8 @@ class RandomizedBST:
     
     def _traverse_postorder(self, root: Node[VT], nodes_list: list[Node[VT]]):
         if root is not None:
-            self._traverse_inorder(root.left, nodes_list)
-            self._traverse_inorder(root.right, nodes_list)
+            self._traverse_postorder(root.left, nodes_list)
+            self._traverse_postorder(root.right, nodes_list)
             nodes_list.append(root)
             
         return nodes_list
@@ -175,10 +174,32 @@ class RandomizedBST:
     def _traverse_preorder(self, root: Node[VT], nodes_list: list[Node[VT]]):
         if root is not None:
             nodes_list.append(root)
-            self._traverse_inorder(root.left, nodes_list)
-            self._traverse_inorder(root.right, nodes_list) 
+            self._traverse_preorder(root.left, nodes_list)
+            self._traverse_preorder(root.right, nodes_list) 
             
         return nodes_list
 
     def traverse_preorder(self) -> list[Node[VT]]:
         return self._traverse_preorder(self._root, [])
+    
+if __name__ == '__main__':
+    from random import randint
+    
+    
+    tree_a = RandomizedBST[int]()
+    tree_b = RandomizedBST[int]()
+    
+    for _ in range(13):
+        value = randint(-99, 99)
+        if randint(1, 30) % 3 == 0:
+            tree_a.insert(value)
+        else:
+            tree_b.insert(value)
+            
+    print(f"Дерево А в обратном порядке: {tree_a.traverse_postorder()}")
+    print(f"Дерево B в симметричном порядке: {tree_b.traverse_inorder()}")
+    
+    for node in tree_b.traverse_inorder():
+        tree_a.insert(node.value)
+    
+    print(f"Дерево А после добавления элементов дерева B в симметричном порядке обхода: \n{tree_a.traverse_postorder()}")
