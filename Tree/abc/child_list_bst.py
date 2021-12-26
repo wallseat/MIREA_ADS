@@ -1,16 +1,16 @@
 from typing import Optional, Generic, TypeVar, List
 
+from typing import Optional
+
 VT = TypeVar("VT")
 
 class Node(Generic[VT]):
-    left: Optional['Node[VT]']
-    right: Optional['Node[VT]']
+    left_right: List['Node[VT]']
     value: VT
     
     def __init__(self, value: VT):
         self.value = value
-        self.left = None
-        self.right = None
+        self.left_right = [None, None]
         
     def __repr__(self):
         return str(self.value)
@@ -26,10 +26,10 @@ class BST(Generic[VT]):
             return root
         
         elif value < root.value:
-            return self._find(root.left, value)
+            return self._find(root.left_right[0], value)
         
         else:
-            return self._find(root.right, value)
+            return self._find(root.left_right[1], value)
     
     def find(self, value):
         return self._find(self._root, value)
@@ -39,10 +39,10 @@ class BST(Generic[VT]):
             return Node(value)
         
         if value < root.value:
-            root.left = self._insert(root.left, value)
+            root.left_right[0] = self._insert(root.left_right[0], value)
             
         elif value > root.value:
-            root.right = self._insert(root.right, value)
+            root.left_right[1] = self._insert(root.left_right[1], value)
         
         return root
     
@@ -50,8 +50,8 @@ class BST(Generic[VT]):
         self._root = self._insert(self._root, value)
     
     def _find_min(self, root: Node[VT]):
-        if root.left is not None:
-            return self._find_min(root.left)
+        if root.left_right[0] is not None:
+            return self._find_min(root.left_right[0])
         else:
             return root
     
@@ -60,20 +60,23 @@ class BST(Generic[VT]):
             return None
     
         if value < root.value:
-            root.left = self._remove(root.left, value)
-            return root
-        elif value > root.value:
-            root.right = self._remove(root.right, value)
+            root.left_right[0] = self._remove(root.left_right[0], value)
             return root
         
-        if root.left is None:
-            return root.right
-        elif root.right is None:
-            return root.left
+        elif value > root.value:
+            root.left_right[1] = self._remove(root.left_right[1], value)
+            return root
+        
+        if root.left_right[0] is None:
+            return root.left_right[1]
+        
+        elif root.left_right[1] is None:
+            return root.left_right[0]
+        
         else:
-            min_value = self._find_min(root.right).value
+            min_value = self._find_min(root.left_right[1]).value
             root.value = min_value
-            root.right = self._remove(root.right, min_value)
+            root.left_right[1] = self._remove(root.left_right[1], min_value)
             return root
         
     def remove(self, value: VT):
@@ -81,9 +84,9 @@ class BST(Generic[VT]):
     
     def _traverse_inorder(self, root: Node[VT], nodes_list: List[Node[VT]]):
         if root is not None:
-            self._traverse_inorder(root.left, nodes_list)
+            self._traverse_inorder(root.left_right[0], nodes_list)
             nodes_list.append(root)
-            self._traverse_inorder(root.right, nodes_list)
+            self._traverse_inorder(root.left_right[1], nodes_list)
             
         return nodes_list
     
@@ -92,8 +95,8 @@ class BST(Generic[VT]):
     
     def _traverse_postorder(self, root: Node[VT], nodes_list: List[Node[VT]]):
         if root is not None:
-            self._traverse_inorder(root.left, nodes_list)
-            self._traverse_inorder(root.right, nodes_list)
+            self._traverse_inorder(root.left_right[0], nodes_list)
+            self._traverse_inorder(root.left_right[1], nodes_list)
             nodes_list.append(root)
             
         return nodes_list
@@ -104,8 +107,8 @@ class BST(Generic[VT]):
     def _traverse_preorder(self, root: Node[VT], nodes_list: List[Node[VT]]):
         if root is not None:
             nodes_list.append(root)
-            self._traverse_inorder(root.left, nodes_list)
-            self._traverse_inorder(root.right, nodes_list) 
+            self._traverse_inorder(root.left_right[0], nodes_list)
+            self._traverse_inorder(root.left_right[1], nodes_list) 
             
         return nodes_list
 

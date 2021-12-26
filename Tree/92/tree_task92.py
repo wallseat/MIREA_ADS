@@ -204,18 +204,29 @@ class AVL_BST(Generic[VT]):
     def traverse_preorder(self) -> List[Node[VT]]:
         return self._traverse_preorder(self._root, [])
 
-if __name__ == "__main__":
+if __name__ == '__main__':
     from random import randint
     
-    tree = AVL_BST[int]()
-    elems = []
+    tree_a = AVL_BST[int]()
+    tree_b = AVL_BST[int]()
+    tree_c = AVL_BST[int]()
     
-    for _ in range(100000):
-        value = randint(-10000, 1000000)
-        tree.insert(value)
-        elems.append(value)
-        
-    print(tree.height())
-    tree.remove(elems[0])
-    print(tree.height())
+    for _ in range(15):
+        v = randint(-99, 100)
+        if randint(0, 29) % 3 == 0:
+            tree_b.insert(v)
+        else:
+            tree_a.insert(v)
     
+    print(f"Дерево А в прямом порядке: {tree_a.traverse_preorder()}\nВысота: {tree_a.height()}")
+    print(f"Дерево B в симметричном порядке: {tree_b.traverse_inorder()}\nВысота: {tree_b.height()}")
+    
+    for node in tree_a.traverse_inorder():
+        tree_c.insert(node.value)
+    
+    for node in tree_b.traverse_postorder():
+        tree_c.insert(node.value)
+    
+    print(f"Дерево С после добавления в дерево А элементов дерева В в обратном порядке:"
+          f"\n{tree_c.traverse_inorder()}"
+          f"\nВысота: {tree_c.height()}")

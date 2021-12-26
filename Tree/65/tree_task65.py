@@ -1,4 +1,4 @@
-from typing import Optional, Generic, TypeVar
+from typing import Optional, Generic, TypeVar, List
 from random import randint
 
 VT = TypeVar("VT")
@@ -80,7 +80,7 @@ class BST(Generic[VT]):
     def remove(self, value: VT):
         self._root = self._remove(self._root, value)
     
-    def _traverse_inorder(self, root: Node[VT], nodes_list: list[Node[VT]]):
+    def _traverse_inorder(self, root: Node[VT], nodes_list: List[Node[VT]]):
         if root is not None:
             self._traverse_inorder(root.left, nodes_list)
             nodes_list.append(root)
@@ -88,10 +88,10 @@ class BST(Generic[VT]):
             
         return nodes_list
     
-    def traverse_inorder(self) -> list[Node[VT]]:
+    def traverse_inorder(self) -> List[Node[VT]]:
         return self._traverse_inorder(self._root, [])
     
-    def _traverse_postorder(self, root: Node[VT], nodes_list: list[Node[VT]]):
+    def _traverse_postorder(self, root: Node[VT], nodes_list: List[Node[VT]]):
         if root is not None:
             self._traverse_inorder(root.left, nodes_list)
             self._traverse_inorder(root.right, nodes_list)
@@ -99,10 +99,10 @@ class BST(Generic[VT]):
             
         return nodes_list
 
-    def traverse_postorder(self) -> list[Node[VT]]:
+    def traverse_postorder(self) -> List[Node[VT]]:
         return self._traverse_postorder(self._root, [])
     
-    def _traverse_preorder(self, root: Node[VT], nodes_list: list[Node[VT]]):
+    def _traverse_preorder(self, root: Node[VT], nodes_list: List[Node[VT]]):
         if root is not None:
             nodes_list.append(root)
             self._traverse_inorder(root.left, nodes_list)
@@ -110,7 +110,7 @@ class BST(Generic[VT]):
             
         return nodes_list
 
-    def traverse_preorder(self) -> list[Node[VT]]:
+    def traverse_preorder(self) -> List[Node[VT]]:
         return self._traverse_preorder(self._root, [])
 
 if __name__ == "__main__":

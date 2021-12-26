@@ -1,6 +1,3 @@
-import queue
-from random import randint
-from time import time
 from queue import SimpleQueue
 
 N_OP = 0
@@ -75,33 +72,3 @@ def swap(queue: SimpleQueue, pos1: int, pos2: int): # 8n + 7
     temp = pop_by_pos(queue, pos1) # 2n + 3
     push_by_pos(queue, pop_by_pos(queue, pos2 - 1), pos1) # 2n + 2 + 2n + 1 = 4n + 3
     push_by_pos(queue, temp, pos2) # 2n + 1
-    
-def bubble_sort(queue: SimpleQueue): # 12n^3 + 10n^2
-    for i in range(queue.qsize()): # Σ (i=0 -> n) ((n - i) * (12n + 10)) = n^2 * (12n + 10) = 12n^3 + 10n^2
-        for j in range(i + 1, queue.qsize() - 1): # Σ(j = i + 1 -> n - 1) (4n + 3 + 8n + 7) = (n - i) * (12n + 10)
-            if seek(queue, i) > seek(queue, j): # 4n + 3
-                swap(queue, i, j) # 8n + 7
-
-
-if __name__ == "__main__":
-    step = 100
-    tests = 10
-    
-    cur_elems = 0
-    for i in range(tests):
-        cur_elems += step
-        queue = SimpleQueue()
-        N_OP = 0
-        
-        for _ in range(cur_elems):
-            queue.put(randint(-999, 1000))
-        
-        start_time = time()
-        bubble_sort(queue)
-        diff_time = time() - start_time
-        
-        print(f"Test: {i + 1}\n"
-              f"Elems: {cur_elems}\n"
-              f"Time: {diff_time}\n"
-              f"N_OP: {N_OP}\n"
-              "-------------------")

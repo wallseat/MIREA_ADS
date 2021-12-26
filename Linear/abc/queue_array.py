@@ -38,13 +38,17 @@ class Queue(Generic[VT]):
         return len(self._queue)
     
     @property
-    def tail(self) -> VT:
+    def tail(self) -> VT: # 1
         return self._queue[-1]
     
     @property
-    def head(self) -> VT:
+    def head(self) -> VT: # 1
         return self._queue[0]
 
+    @property
+    def n_op(self) -> int:
+        return self._nop
+    
 def print_queue(queue: Queue):
     elems = []
     for _ in range(queue.size): 
@@ -53,51 +57,51 @@ def print_queue(queue: Queue):
         queue.push(el)
 
     print("Queue[" + ", ".join(map(str, elems)) + "]")
-
-def rotate(queue: Queue):
+    
+def rotate(queue: Queue): # 2n + 4
     queue.push(queue.pop())
     
-def seek(queue: Queue[VT], pos: int) -> VT: 
-    for _ in range(pos):
+def seek(queue: Queue, pos: int): # 2n * pos + 4pos + 4n + 8 + 2n^2 + 8n - 2n * pos - 4pos - 2n - 4 = 2n^2
+    for _ in range(pos): # pos * (2n + 4) = 2n * pos + 4pos
         rotate(queue) 
 
-    el = queue.pop()
-    queue.push(el)
+    el = queue.pop() # n + 2
+    queue.push(el) # n + 2
     
-    for _ in range(queue.size - pos - 1):
+    for _ in range(queue.size - pos - 1): # (n - pos - 1) * (2n + 4) = 2n^2 + 8n - 2n * pos - 4pos - 2n - 4
         rotate(queue)
     
     return el
 
-def pop_by_pos(queue: Queue[VT], pos: int) -> VT:
-    for _ in range(pos):
+def pop_by_pos(queue: Queue, pos: int): # 2n^2 + 3n - 2
+    for _ in range(pos): # 2n * pos + 4pos
         rotate(queue) 
         
-    el = queue.pop()
+    el = queue.pop() # n + 2
     
-    for _ in range(queue.size - pos):
+    for _ in range(queue.size - pos): # (n - pos - 1) * (2n + 4)
         rotate(queue) 
         
     return el
 
-def push_by_pos(queue: Queue[VT], el: VT, pos: int): 
+def push_by_pos(queue: Queue, el, pos: int): # 2n^2 + 3n - 2
     
-    if pos >= queue.size:
-        queue.push(el)
+    if pos >= queue.size: # 1
+        queue.push(el) # n + 2
         return
     
-    for _ in range(pos):
+    for _ in range(pos): # 2n * pos + 4pos
         rotate(queue)
     
-    queue.push(el) 
+    queue.push(el) # n + 2
     
-    for _ in range(queue.size - pos - 1):
+    for _ in range(queue.size - pos - 1): # (n - pos - 1) * (2n + 4)
         rotate(queue)
     
-def swap(queue: Queue, pos1: int, pos2: int):
-    temp = pop_by_pos(queue, pos1)
-    push_by_pos(queue, pop_by_pos(queue, pos2 - 1), pos1)
-    push_by_pos(queue, temp, pos2)
+def swap(queue: Queue, pos1: int, pos2: int): # 6n^2 + 9n - 7
+    temp = pop_by_pos(queue, pos1) # 2n^2 + 3n - 2
+    push_by_pos(queue, pop_by_pos(queue, pos2 - 1), pos1) # 2n^2 + 3n - 3
+    push_by_pos(queue, temp, pos2) # 2n^2 + 3n - 2
 
 def slice_queue(queue: Queue[VT], l: int = 0, r: int = -1) -> Queue[VT]:
     q = Queue[VT]()
@@ -108,11 +112,11 @@ def slice_queue(queue: Queue[VT], l: int = 0, r: int = -1) -> Queue[VT]:
     for _ in range(l):
         rotate(queue)
     
-    for _ in range(r - l - 1):
+    for _ in range(r - l + 1):
         q.push(queue.head)
         rotate(queue)
     
-    for _ in range(queue.size - r + 1):
+    for _ in range(queue.size - r - 1):
         rotate(queue)
     
     return q
@@ -125,6 +129,7 @@ if __name__ == "__main__":
     for el in test_data:
         queue.push(el)
     
+    # 0
     print_queue(queue)
     
     #1
@@ -159,6 +164,7 @@ if __name__ == "__main__":
         rotate(queue)
         for i, el in enumerate(test_data):
             assert seek(queue, i) == el
+
     
     # 6
     for _ in test_data:

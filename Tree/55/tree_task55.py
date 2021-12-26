@@ -5,12 +5,14 @@ VT = TypeVar("VT")
 class Node(Generic[VT]):
     left: Optional['Node[VT]']
     right: Optional['Node[VT]']
+    parent: Optional['Node[VT]']
     value: VT
     
     def __init__(self, value: VT):
         self.value = value
         self.left = None
         self.right = None
+        self.parent = None
         
     def __repr__(self):
         return str(self.value)
@@ -21,7 +23,7 @@ class BST(Generic[VT]):
     def __init__(self):
         self._root = None
     
-    def _find(self, root: Node[VT], value: VT):
+    def _find(self, root: Node[VT], value: VT) -> Optional[Node[VT]]:
         if root is None or root.value == value:
             return root
         
@@ -31,39 +33,47 @@ class BST(Generic[VT]):
         else:
             return self._find(root.right, value)
     
-    def find(self, value):
+    def find(self, value) -> Optional[Node[VT]]:
         return self._find(self._root, value)
     
-    def _insert(self, root: Node[VT], value: VT):
+    def _insert(self, root: Node[VT], value: VT) -> Optional[Node[VT]]:
         if root is None:
             return Node(value)
         
         if value < root.value:
             root.left = self._insert(root.left, value)
+            root.left.parent = root
             
         elif value > root.value:
             root.right = self._insert(root.right, value)
+            root.right.parent = root
         
         return root
     
     def insert(self, value: VT):
         self._root = self._insert(self._root, value)
     
-    def _find_min(self, root: Node[VT]):
+    def _find_min(self, root: Node[VT]) -> Node[VT]:
         if root.left is not None:
             return self._find_min(root.left)
         else:
             return root
     
-    def _remove(self, root: Node[VT], value: VT):
+    def _remove(self, root: Node[VT], value: VT) -> Optional[Node[VT]]:
         if root is None:
             return None
     
         if value < root.value:
             root.left = self._remove(root.left, value)
+            if root.left:
+                root.left.parent = root
+                
             return root
         elif value > root.value:
             root.right = self._remove(root.right, value)
+            if root.right:
+                root.right.parent = root
+            
             return root
         
         if root.left is None:
@@ -111,3 +121,24 @@ class BST(Generic[VT]):
 
     def traverse_preorder(self) -> List[Node[VT]]:
         return self._traverse_preorder(self._root, [])
+    
+if __name__ == "__main__":
+    from random import randint
+    
+    tree_a = BST[int]()
+    tree_b = BST[int]()
+    
+    for _ in range(15):
+        v = randint(-99, 100)
+        tree_a.insert(v)
+        
+        if randint(0, 99) % 10 >= 7:
+            tree_b.insert(v)
+    
+    print("Дерево А в прямом порядке: " + str(tree_a.traverse_preorder()))
+    print("Дерево B в симметричном порядке: " + str(tree_b.traverse_inorder()))
+    
+    for v in tree_b.traverse_inorder():
+        tree_a.remove(v.value)
+    
+    print("Дерево А после удаления элементов дерева B: " + str(tree_a.traverse_preorder()))

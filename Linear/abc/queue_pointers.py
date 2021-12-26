@@ -21,13 +21,13 @@ class Queue(Generic[VT]):
     _head: Optional[Node[VT]]
     _tail: Optional[Node[VT]]
     _size: int
-    _nop: int
+    _n_op: int
     
     def __init__(self):
         self._head = None
         self._tail = None
         self._size = 0
-        self._nop = 0
+        self._n_op = 0
     
     def push(self, value: VT): # 5
         node = Node(value)
@@ -40,7 +40,7 @@ class Queue(Generic[VT]):
             self._tail = node # 1
         
         self._size += 1 # 1
-        self._nop += 4
+        self._n_op += 4
     
     def pop(self) -> VT: # 6
         if self.is_empty(): # 1
@@ -53,7 +53,7 @@ class Queue(Generic[VT]):
             self._tail = None # 1
         
         self._size -= 1 # 1
-        self._nop += 6
+        self._n_op += 6
         
         return node.value
     
@@ -72,6 +72,10 @@ class Queue(Generic[VT]):
     def size(self) -> int:
         return self._size
 
+    @property
+    def n_op(self) -> int:
+        return self._n_op
+    
 def print_queue(queue: Queue):
     elems = []
     for _ in range(queue.size): 

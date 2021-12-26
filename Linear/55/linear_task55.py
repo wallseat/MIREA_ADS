@@ -1,6 +1,3 @@
-import queue
-from random import randint
-from time import time
 from queue import SimpleQueue
 
 N_OP = 0
@@ -75,33 +72,51 @@ def swap(queue: SimpleQueue, pos1: int, pos2: int): # 8n + 7
     temp = pop_by_pos(queue, pos1) # 2n + 3
     push_by_pos(queue, pop_by_pos(queue, pos2 - 1), pos1) # 2n + 2 + 2n + 1 = 4n + 3
     push_by_pos(queue, temp, pos2) # 2n + 1
-    
-def bubble_sort(queue: SimpleQueue): # 12n^3 + 10n^2
-    for i in range(queue.qsize()): # Σ (i=0 -> n) ((n - i) * (12n + 10)) = n^2 * (12n + 10) = 12n^3 + 10n^2
-        for j in range(i + 1, queue.qsize() - 1): # Σ(j = i + 1 -> n - 1) (4n + 3 + 8n + 7) = (n - i) * (12n + 10)
-            if seek(queue, i) > seek(queue, j): # 4n + 3
-                swap(queue, i, j) # 8n + 7
 
+def heapify(queue: SimpleQueue, n: int, i: int): # 7 + 8n + 10 + 8n + 7 + log(n) = 16n + log(n) + 14
+    largest = i # 1
+    l = 2 * i + 1 # 3
+    r = 2 * i + 2 # 3
+  
+    if l < n and seek(queue, i) < seek(queue, l): # 4n + 4
+        largest = l # 1
+  
+    if r < n and seek(queue, largest) < seek(queue, r): # 4n + 4
+        largest = r # 1
+  
+    if largest != i: # 1
+        swap(queue, i, largest) # 8n + 7
+        heapify(queue, n, largest) # ~log(n)
+  
+def heap_sort(queue: SimpleQueue): #32n^2 + nlog(n) + 21n + 1
+    n = queue.qsize() # 1
+  
+    for i in range(n // 2 - 1, -1, -1): # (n // 2) * (16n + log(n) + 14) = 8n^2 + nlog(n)/2 + 7n
+        heapify(queue, n, i)
+  
+    for i in range(n-1, 0, -1): # n * (8n + 7 + 16n + log(n) + 14) = 24n^2 + nlog(n) + 14n
+        swap(queue, 0, i)
+        heapify(queue, i, 0)
 
 if __name__ == "__main__":
-    step = 100
-    tests = 10
+    import time
+    from random import randint
     
-    cur_elems = 0
-    for i in range(tests):
-        cur_elems += step
-        queue = SimpleQueue()
+    tests = 10
+    step = 200
+    
+    for test_num in range(1, tests + 1):
         N_OP = 0
+        queue = SimpleQueue[int]()
+        for _ in range(test_num * step):
+            queue.put(randint(-10000, 10000))
         
-        for _ in range(cur_elems):
-            queue.put(randint(-999, 1000))
+        start_time = time.time()
+        heap_sort(queue)
+        total_time = time.time() - start_time
         
-        start_time = time()
-        bubble_sort(queue)
-        diff_time = time() - start_time
-        
-        print(f"Test: {i + 1}\n"
-              f"Elems: {cur_elems}\n"
-              f"Time: {diff_time}\n"
-              f"N_OP: {N_OP}\n"
-              "-------------------")
+        print(f"Test: {test_num}")
+        print(f"Elems count: {test_num * step}")
+        print(f"Total time: {total_time}")
+        print(f"N_OP: {N_OP}")
+        print("-------------")

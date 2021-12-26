@@ -115,7 +115,6 @@ class Dequeue(Generic[VT]):
         return self._n_op
 
 
-
 def print_dequeue(dequeue: Dequeue):
     elems = []
     for _ in range(dequeue.size): 
@@ -155,7 +154,9 @@ def seek(dequeue: Dequeue[VT], index: int) -> VT: # 14n + 8
             
         return node
 
-def swap(dequeue: Dequeue, pos1: int, pos2: int): # Σ(0, left_el_pos)(14) + Σ(0, left_el_pos)(14) + Σ(0, right_el_pos - left_el_pos - 1)(14) + 4 + 3 + 7 + 6 + 6 = 28n + 26
+def swap(dequeue: Dequeue, pos1: int, pos2: int):
+    # # Σ(0, left_el_pos)(14) + Σ(0, left_el_pos)(14) + Σ(0, right_el_pos - left_el_pos - 1)(14) + 4 + 3 + 7 + 6 + 6 = 
+    # = 28n + 26
     left_el_pos, right_el_pos = min(pos1, pos2), max(pos1, pos2) # 4
     
     if left_el_pos < 0 or right_el_pos >= dequeue.size: # 3
@@ -204,29 +205,31 @@ def swap(dequeue: Dequeue, pos1: int, pos2: int): # Σ(0, left_el_pos)(14) + Σ(
             rotate_left(dequeue)
 
 def quick_sort(dequeue: Dequeue):
-    
-    def _quick_sort(left: int, right: int):
-        i = left
-        j = right
+    def _quick_sort(left: int, right: int): 
+        # 14n + 8 + 28n^2 * log(n) + 32n * log(n) + 2 + 4log(nlog(n)) = 
+        # 28n^2 * log(n) + 46n * log(n) + 4log(nlog(n)) + 10
+        i = left # 1
+        j = right # 1
         
-        pivot = seek(dequeue, (i + j) // 2)
+        pivot = seek(dequeue, (i + j) // 2) # 14n + 8
         
-        while i < j:
-            while seek(dequeue, i) < pivot:
-                i += 1
-            while seek(dequeue, j) > pivot:
-                j -= 1
+        while i < j: # ((i + j) / 2) * (
+            while seek(dequeue, i) < pivot: # n * (i + j + 1)
+                i += 1 # 1
+            while seek(dequeue, j) > pivot: # n * (i + j + 1)
+                j -= 1 # 1
         
-            if i <= j:
-                if i < j:
-                    swap(dequeue, i, j)
-                i += 1
-                j -= 1
+            if i <= j: # 1
+                if i < j: # 1
+                    swap(dequeue, i, j) # 28n + 26
+                i += 1 # 1
+                j -= 1 # 1
+        # ) = ((i + j) / 2) * (2n * (i + j + 1) + 6 + 28n + 26) ~= 28n^2 * log(n) + 32n * log(n)
         
-        if left < j:
-            _quick_sort(left, j)
-        if i < right:
-            _quick_sort(i, right)
+        if left < j: # 1
+            _quick_sort(left, j) # ~= 2log(nlog(n))
+        if i < right: # 1
+            _quick_sort(i, right) # ~= 2log(nlog(n))
                 
     _quick_sort(0, dequeue.size - 1)
 

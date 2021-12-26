@@ -156,7 +156,7 @@ class RandomizedBST(Generic[VT]):
     def height(self) -> int:
         return self._height(self._root)
 
-    def _traverse_inorder(self, root: int, nodes_list: list[Node[VT]]):
+    def _traverse_inorder(self, root: int, nodes_list: List[Node[VT]]):
         if root is not None:
             self._traverse_inorder(self._left[root], nodes_list)
             nodes_list.append(self._nodes[root])
@@ -164,10 +164,10 @@ class RandomizedBST(Generic[VT]):
             
         return nodes_list
     
-    def traverse_inorder(self) -> list[Node[VT]]:
+    def traverse_inorder(self) -> List[Node[VT]]:
         return self._traverse_inorder(self._root, [])
     
-    def _traverse_postorder(self, root: int, nodes_list: list[Node[VT]]):
+    def _traverse_postorder(self, root: int, nodes_list: List[Node[VT]]):
         if root is not None:
             self._traverse_postorder(self._left[root], nodes_list)
             self._traverse_postorder(self._right[root], nodes_list)
@@ -175,10 +175,10 @@ class RandomizedBST(Generic[VT]):
             
         return nodes_list
 
-    def traverse_postorder(self) -> list[Node[VT]]:
+    def traverse_postorder(self) -> List[Node[VT]]:
         return self._traverse_postorder(self._root, [])
     
-    def _traverse_preorder(self, root: Node[VT], nodes_list: list[Node[VT]]):
+    def _traverse_preorder(self, root: Node[VT], nodes_list: List[Node[VT]]):
         if root is not None:
             nodes_list.append(self._nodes[root])
             self._traverse_preorder(self._left[root], nodes_list)
@@ -186,5 +186,5 @@ class RandomizedBST(Generic[VT]):
             
         return nodes_list
 
-    def traverse_preorder(self) -> list[Node[VT]]:
+    def traverse_preorder(self) -> List[Node[VT]]:
         return self._traverse_preorder(self._root, []) 

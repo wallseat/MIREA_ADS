@@ -187,30 +187,25 @@ class RandomizedBST(Generic[VT]):
         return nodes_list
 
     def traverse_preorder(self) -> List[Node[VT]]:
-        return self._traverse_preorder(self._root, []) 
+        return self._traverse_preorder(self._root, [])
     
 if __name__ == "__main__":
     from random import randint
-    
-    def print_nodes(nodes: List[Node]):
-        string = ""
-        for node in nodes:
-            string += f"{node.value}\n"
-        return string
-    
+      
     tree_a = RandomizedBST[int]()
     tree_b = RandomizedBST[int]()
     
     for _ in range(13):
-        value = randint(10, 99)
-        tree_a.insert(value)
-        if randint(1, 30) % 3 == 0:
+        value = randint(-20, 20)
+        if randint(1, 34) % 3 == 0:
+            tree_a.insert(value)
+        else:
             tree_b.insert(value)
             
-    print(f"Дерево А в обратном порядке: \n{print_nodes(tree_a.traverse_postorder())}")
-    print(f"Дерево B в симметричном порядке: \n{print_nodes(tree_b.traverse_inorder())}")
+    print(f"Дерево А в обратном порядке: {tree_a.traverse_postorder()}")
+    print(f"Дерево B в симметричном порядке: {tree_b.traverse_inorder()}")
     
-    for node in tree_b.traverse_inorder():
-        tree_a.remove(node.value)
-        
-    print(f"Дерево А после удаления элементов дерева В: \n{print_nodes(tree_a.traverse_postorder())}")
+    for node in tree_b.traverse_preorder():
+        tree_a.insert(node.value)
+    
+    print(f"Дерево А после добавления элементов дерева B в прямом порядке обхода: \n{tree_a.traverse_postorder()}")
