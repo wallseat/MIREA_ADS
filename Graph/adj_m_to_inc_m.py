@@ -2,7 +2,11 @@ def load_adj_m(file_path: str):
     with open(file_path, 'r') as f:
         matrix = []
         for line in f.readlines():
-            matrix.append(list(map(int, line.split())))
+            row_data = list(map(int, line.split()))
+            if len(row_data) == 1:
+                continue
+            
+            matrix.append(row_data)
     
     return matrix
         
