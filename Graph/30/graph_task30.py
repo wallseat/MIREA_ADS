@@ -1,3 +1,5 @@
+from typing import List
+
 def read_inc_matrix(filename):
     with open(filename, 'r') as f:
         dim = int(f.readline().strip())
@@ -72,7 +74,7 @@ def find_center(matrix):
     return max_distances[0]
 
 
-def find_chains(matrix: list[list[int]], v: int, distance: int):
+def find_chains(matrix: List[List[int]], v: int, distance: int):
     stack = []
     chains = []
     
