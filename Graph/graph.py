@@ -47,18 +47,21 @@ class Graph:
         for i in range(dim):
             self._vertices.append(Vertex(i))
 
-    def _load_adj_matrix(self, data: List[List[int]], dim: int):
-        self._edges = []
-
+    def _load_adj_matrix(self, data: List[List[int]], dim: int) -> None:
         self._init_vertices(dim)
         for i, vertex in enumerate(data):
             for j, edge_len in enumerate(vertex):
                 if edge_len > 0:
-                    self._edges.append(Edge(i, j, edge_len))
+                    self.add_e(i, j, edge_len)
+    
+    def _load_adj_list(self, data: List[List[int]], dim: int) -> None:
+        self._init_vertices(dim)
 
-    def _load_adj_list(self, data: List[List[int]], dim: int):
-        self._edges = []
-
+        for i, adj in enumerate(data):
+            for j in adj:
+                self.add_e(i, j, 1)
+    
+    def _load_edge_list(self, data: List[List[int]], dim: int) -> None:
         self._init_vertices(dim)
 
         for edge in data:
@@ -67,11 +70,9 @@ class Graph:
             else:
                 v1, v2, edge_len = *edge, 1
 
-            self._edges.append(Edge(v1, v2, edge_len))
+            self.add_e(v1, v2, edge_len)
 
-    def _load_inc_matrix(self, data: List[List[int]], dim: int):
-        self._edges = []
-
+    def _load_inc_matrix(self, data: List[List[int]], dim: int) -> None:
         self._init_vertices(dim)
 
         transposed_data = list(zip(*data))  # транспонирование
@@ -91,17 +92,17 @@ class Graph:
                     break
 
             if v1_v2_len > 0:
-                self._edges.append(Edge(v1, v2, v1_v2_len))
+                self.add_e(v1, v2, v1_v2_len)
 
             if v2_v1_len > 0:
-                self._edges.append(Edge(v2, v1, v2_v1_len))
+                self.add_e(v2, v1, v2_v1_len)
 
-    def _load_labels(self, labels: Dict[str, str]):
+    def _load_labels(self, labels: Dict[str, str]) -> None:
         for index, label in labels.items():
             index = int(index)
             self._vertices[index].label = label
 
-    def load(self, filename: str):
+    def load(self, filename: str) -> None:
         with open(filename, "r", encoding="utf8") as f:
             graph_json: dict = json.load(f)
 
@@ -126,6 +127,9 @@ class Graph:
 
         elif _format == "adj_list":
             self._load_adj_list(_data, _dim)
+            
+        elif _format == "edge_list":
+            self._load_edge_list(_data, _dim)
 
         elif _format == "inc_matrix":
             self._load_inc_matrix(_data, _dim)
@@ -136,14 +140,14 @@ class Graph:
         if _labels:
             self._load_labels(_labels)
 
-    def first(self, v: int):
+    def first(self, v: int) -> None | int:
         for edge in self._edges:
             if edge.vertices[0] == v:
                 return edge.vertices[1]
 
         return None
 
-    def next(self, v: int, i: int):
+    def next(self, v: int, i: int) -> None | int:
         state = 0
         next_index = None
 
@@ -161,9 +165,9 @@ class Graph:
 
         return next_index
 
-    def vertex(self, v: int, i: int):
+    def vertex(self, v: int, i: int) -> None | int:
         state = 0
-        vertices_set = []
+        vertices_set: List[int] = []
 
         for edge in self._edges:
             if edge.vertices[0] != v:
@@ -180,13 +184,14 @@ class Graph:
         else:
             return None
 
-    def add_v(self, index: int, label: str = ""):
+    def add_v(self, index: int, label: str = "") -> None:
         for vertex in self._vertices:
             if vertex.index == index:
                 raise Exception(f"Вершина с таким индексом уже существует! ({index})")
+            
         self._vertices.append(Vertex(index, label))
 
-    def add_e(self, v1: int, v2: int, edge_len: int = 1):
+    def add_e(self, v1: int, v2: int, edge_len: int = 1) -> None:
         found_v1 = False
         found_v2 = False
         for vertex in self._vertices:
@@ -201,7 +206,7 @@ class Graph:
         else:
             self._edges.append(Edge(v1, v2, edge_len))
 
-    def del_v(self, index: int):
+    def del_v(self, index: int) -> None:
         for vertex in self._vertices:
             if vertex.index == index:
                 break
@@ -216,7 +221,7 @@ class Graph:
         for edge in edges_to_remove:
             self._edges.remove(edge)
 
-    def del_e(self, v1: int, v2: int):
+    def del_e(self, v1: int, v2: int) -> None:
         for edge in self._edges:
             if edge.vertices[0] == v1 and edge.vertices[1] == v2:
                 break
@@ -232,13 +237,13 @@ class Graph:
 
         return adj_matrix
 
-    def as_dict(self):
+    def as_dict(self) -> Dict:
         return {"Vertices": self._vertices, "Edges": self._edges}
 
     @property
-    def vertices(self):
+    def vertices(self) -> List[Vertex]:
         return self._vertices
 
     @property
-    def edges(self):
+    def edges(self) -> List[Edge]:
         return self._edges

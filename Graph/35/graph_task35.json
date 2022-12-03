@@ -1,6 +1,6 @@
 {
   "dim": 5,
-  "format": "adj_list",
+  "format": "edge_list",
   "data": [
     [0, 2],
     [1, 0],
