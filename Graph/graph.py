@@ -9,6 +9,7 @@ class Vertex:
         self._index = index
         self.label = label
     
+    @property
     def index(self) -> int:
         return self._index
 
@@ -23,6 +24,7 @@ class Edge:
         self._vertices = (v1, v2)
         self.len = len
     
+    @property
     def vertices(self) -> Tuple[int, int]:
         return self._vertices
     

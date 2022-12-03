@@ -6,3 +6,6 @@ __pycache__/
 *.exe
 *.bin
 *.o
+
+.venv/
+venv/
