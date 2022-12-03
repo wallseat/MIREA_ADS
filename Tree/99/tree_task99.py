@@ -1,4 +1,4 @@
-from typing import Generic, TypeVar, Optional, List
+from typing import Generic, List, Optional, TypeVar
 
 VT = TypeVar("VT")
 
@@ -215,8 +215,8 @@ class AVL_BST(Generic[VT]):
 
 
 if __name__ == "__main__":
-    from random import randint
     from itertools import chain
+    from random import randint
 
     tree_a = AVL_BST[int]()
     tree_b = AVL_BST[int]()

@@ -1,5 +1,4 @@
 import copy
-from pprint import pprint
 
 
 def read_inc_matrix(filename):

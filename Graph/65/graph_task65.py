@@ -1,9 +1,5 @@
 import json
-from typing import Optional, Tuple, List, Dict, Set
-
-
-import json
-from typing import Optional, Tuple, List, Dict
+from typing import Dict, List, Optional, Set, Tuple
 
 
 class Vertex:
@@ -57,14 +53,14 @@ class Graph:
             for j, edge_len in enumerate(vertex):
                 if edge_len > 0:
                     self.add_e(i, j, edge_len)
-    
+
     def _load_adj_list(self, data: List[List[int]], dim: int) -> None:
         self._init_vertices(dim)
 
         for i, adj in enumerate(data):
             for j in adj:
                 self.add_e(i, j, 1)
-    
+
     def _load_edge_list(self, data: List[List[int]], dim: int) -> None:
         self._init_vertices(dim)
 
@@ -131,7 +127,7 @@ class Graph:
 
         elif _format == "adj_list":
             self._load_adj_list(_data, _dim)
-            
+
         elif _format == "edge_list":
             self._load_edge_list(_data, _dim)
 
@@ -192,7 +188,7 @@ class Graph:
         for vertex in self._vertices:
             if vertex.index == index:
                 raise Exception(f"Вершина с таким индексом уже существует! ({index})")
-            
+
         self._vertices.append(Vertex(index, label))
 
     def add_e(self, v1: int, v2: int, edge_len: int = 1) -> None:
@@ -251,7 +247,6 @@ class Graph:
     @property
     def edges(self) -> List[Edge]:
         return self._edges
-
 
 
 def get_cycles_with_fix_len(path_len: int, matrix: List[List[int]]) -> List[List[int]]:

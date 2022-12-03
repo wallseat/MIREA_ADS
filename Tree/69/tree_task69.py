@@ -1,6 +1,4 @@
-from typing import Optional, Generic, TypeVar, List
-
-from typing import Optional
+from typing import Generic, List, Optional, TypeVar
 
 VT = TypeVar("VT")
 

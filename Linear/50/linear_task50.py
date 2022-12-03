@@ -1,4 +1,4 @@
-from typing import Generic, TypeVar, Optional
+from typing import Generic, Optional, TypeVar
 
 VT = TypeVar("VT")
 

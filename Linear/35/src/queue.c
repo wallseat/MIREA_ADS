@@ -2,7 +2,7 @@
 
 S_Node *S_Node_init(int32_t v)
 {
-    S_Node *node = (S_Node*) malloc(sizeof(S_Node)); 
+    S_Node *node = (S_Node*) malloc(sizeof(S_Node));
     node->prev = NULL;
     node->v = v;
 
@@ -34,7 +34,7 @@ void S_Queue_push(S_Queue *queue, S_Node *node) // 2n + 3
     else
     {
         S_Node *tail = queue->head; // 2
-        while (tail->prev) { 
+        while (tail->prev) {
             tail = tail->prev; // 2
             queue->N_OP += 3;
         } // 2 * (n - 1)
@@ -51,20 +51,20 @@ void S_Queue_push(S_Queue *queue, S_Node *node) // 2n + 3
 
 S_Node *S_Queue_pop(S_Queue *queue) // 9
 {
-    if (!queue->size) 
+    if (!queue->size)
     {
         fprintf(stderr, "Invalaid opertion pop! Queue is empty!\n");
         exit(EXIT_FAILURE);
     }
-    
+
     S_Node *node = queue->head; // 2
     queue->head = node->prev; // 3
     node->prev = NULL; // 2
     queue->size--; // 2
-    
+
     queue->N_OP += 9;
 
-    return node;    
+    return node;
 }
 
 void S_Queue_print(S_Queue *queue)

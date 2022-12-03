@@ -1,7 +1,7 @@
 import queue
+from queue import SimpleQueue
 from random import randint
 from time import time
-from queue import SimpleQueue
 
 N_OP = 0
 

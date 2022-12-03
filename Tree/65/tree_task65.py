@@ -1,5 +1,5 @@
-from typing import Optional, Generic, TypeVar, List
 from random import randint
+from typing import Generic, List, Optional, TypeVar
 
 VT = TypeVar("VT")
 

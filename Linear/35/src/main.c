@@ -30,7 +30,7 @@ S_Node *_pop_by_pos(S_Queue *queue, size_t pos) // 3 + 10 + 1 + 2 + 10 + 2nk + 1
     while (before--) S_Queue_rotate(queue); // k * (2n + 14 + 1) = 2nk + 15k
     node = S_Queue_pop(queue); // 10
     while (--after) S_Queue_rotate(queue); // (n - k - 1) * (2n + 14 + 1) = 2n^2 + 13n - 2kn - 15k - 15
-    
+
     return node;
 }
 
@@ -41,14 +41,14 @@ void _push_by_pos(S_Queue *queue, S_Node *node, size_t pos) // 1 + 3 + 2n + 3 + 
         S_Queue_push(queue, node); // 2n + 3
         return;
     }
-   
+
     size_t before = pos; // 1
     size_t after = S_Queue_len(queue) - pos; // 3
 
     while(before--) S_Queue_rotate(queue); // k * (2n + 14 + 1) = 2nk + 15k
     S_Queue_push(queue, node); // 2n + 3
     while(after--) S_Queue_rotate(queue); // (n - k) * (2n + 15) = 2n^2 + 15n - 2nk - 15k
-    
+
 }
 
 void _quick_sort(S_Queue *queue, int32_t left, int32_t right) // 2n^3 * log(n) + 5
@@ -75,9 +75,9 @@ void _quick_sort(S_Queue *queue, int32_t left, int32_t right) // 2n^3 * log(n) +
             i++; // 1
             j--; // 1
         }
-    
+
     } while (i < j); // 1
-    // ((i + j) / 2) * (2i + 2j + 10 + 2i^2 + 13i + 12 + 17i + 31+ 2j^2 + 9j + 2j^2 + 17j + 12) = 
+    // ((i + j) / 2) * (2i + 2j + 10 + 2i^2 + 13i + 12 + 17i + 31+ 2j^2 + 9j + 2j^2 + 17j + 12) =
     // = 16i^2 + 30ij + 32i + i^3 + 2ij^2 + 14j^2 + 32j + i^2j + 2j^3 ~= n^3
 
     if (left < j) // 1
@@ -116,6 +116,6 @@ int main(int argc, char **argv)
         int64_t t_stop = millis(NULL);
         printf("Elems: %d\nN_OP: %li\nTime: %"PRId64"ms\n-------------------\n", i, queue->N_OP, t_stop - t_start);
     }
-   
+
     return 0;
 }

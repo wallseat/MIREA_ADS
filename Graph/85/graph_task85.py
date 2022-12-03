@@ -1,4 +1,5 @@
-import copy, random
+import copy
+import random
 from math import pow
 
 

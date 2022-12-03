@@ -1,7 +1,8 @@
 import itertools
-import networkx as nx
+
 import matplotlib.pyplot as plt
-import time
+import networkx as nx
+
 
 # Класс TextColors - класс с escape - последовательностями ANSI
 # для цветового оформления вывода
@@ -25,7 +26,6 @@ class Graph:
         self.all_cycles_buff = []
         self.visual_buff = []
         self.matrix = [[0 for x in range(self.length)] for y in range(self.length)]
-        pass
 
     # Визуализация графа
     def visualize(self):
