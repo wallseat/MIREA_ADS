@@ -1,7 +1,8 @@
 from typing import List
 
+
 def read_inc_matrix(filename):
-    with open(filename, 'r') as f:
+    with open(filename, "r") as f:
         dim = int(f.readline().strip())
         matrix = [[0] * dim for _ in range(dim)]
 
@@ -14,7 +15,7 @@ def read_inc_matrix(filename):
             first_e = 0
             second = None
             second_e = 0
-            
+
             for j in range(dim):
                 if inc_matrix[j][i] != 0:
                     if first is None:
@@ -28,17 +29,18 @@ def read_inc_matrix(filename):
 
                     if first and second:
                         break
-            
-            if first_e :
+
+            if first_e:
                 matrix[first][second] = first_e
             if second_e:
                 matrix[second][first] = second_e
-    
+
     return matrix
+
 
 def BFS(matrix):
     distance_matrix = [[0] * len(matrix) for i in range(len(matrix))]
-    
+
     def _bfs(v: int):
         queue = [v]
         visited = set()
@@ -47,37 +49,38 @@ def BFS(matrix):
             for i, e in enumerate(matrix[cur_node]):
                 if i in visited:
                     continue
-            
-                if e > 0: 
+
+                if e > 0:
                     distance = e + distance_matrix[v][cur_node]
                     distance_matrix[v][i] = distance
-                    
+
                     queue.append(i)
                     visited.add(i)
-    
+
     for i in range(len(matrix)):
         _bfs(i)
-        
+
     return distance_matrix
+
 
 def find_center(matrix):
     max_distances = []
-    
+
     for i, row in enumerate(matrix):
         if min(row) == 0:
             continue
         else:
             max_distances.append((i, max(row)))
-    
+
     max_distances.sort(key=lambda tup: tup[1])
-    
+
     return max_distances[0]
 
 
 def find_chains(matrix: List[List[int]], v: int, distance: int):
     stack = []
     chains = []
-    
+
     def _dfs(v: int, _distance: int):
         stack.append(v)
         for i, e in enumerate(matrix[v]):
@@ -88,17 +91,18 @@ def find_chains(matrix: List[List[int]], v: int, distance: int):
                     chains.append([*stack.copy(), i])
                 elif _distance - e >= 0:
                     _dfs(i, _distance - e)
-                
+
         stack.remove(v)
-    
+
     _dfs(v, distance)
-    
+
     return chains
 
-if __name__ == '__main__':
+
+if __name__ == "__main__":
     from pprint import pprint
 
-    matrix = read_inc_matrix('graph_task30.txt')
+    matrix = read_inc_matrix("graph_task30.txt")
     distance_matrix = BFS(matrix)
     print("Матрица расстояний:")
     pprint(distance_matrix)

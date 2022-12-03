@@ -1,5 +1,5 @@
 def read_inc_matrix(filename):
-    with open(filename, 'r') as f:
+    with open(filename, "r") as f:
         dim = int(f.readline().strip())
         matrix = [[0] * dim for _ in range(dim)]
 
@@ -25,8 +25,9 @@ def read_inc_matrix(filename):
 
     return matrix, dim, len(inc_matrix[0])
 
+
 def bfs(matrix):
-    
+
     bfs_queue = [0]
     visited = set()
     cycles_count = 0
@@ -34,18 +35,18 @@ def bfs(matrix):
         for i, e in enumerate(matrix[bfs_queue.pop(0)]):
             if not e:
                 continue
-            
+
             if i in visited:
                 cycles_count += 1
-                
+
             else:
                 bfs_queue.append(i)
                 visited.add(i)
-    
-    return cycles_count
-                    
 
-matrix, v, e = read_inc_matrix('graph_task92.txt')
+    return cycles_count
+
+
+matrix, v, e = read_inc_matrix("graph_task92.txt")
 cycles_count = bfs(matrix)
 
 print(f"Количество вершин: {v}")

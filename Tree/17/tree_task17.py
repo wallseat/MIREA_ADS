@@ -149,5 +149,5 @@ if __name__ == "__main__":
 
     print(
         "Дерево А в прямом порядке после добавления элементов дерева B в обратном порядке:\n",
-        str(tree_a.traverse_preorder())
+        str(tree_a.traverse_preorder()),
     )

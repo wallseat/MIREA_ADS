@@ -1,8 +1,9 @@
 import copy
 from pprint import pprint
 
+
 def read_inc_matrix(filename):
-    with open(filename, 'r') as f:
+    with open(filename, "r") as f:
         dim = int(f.readline().strip())
         matrix = [[0] * dim for _ in range(dim)]
 
@@ -15,7 +16,7 @@ def read_inc_matrix(filename):
             first_e = 0
             second = None
             second_e = 0
-            
+
             for j in range(dim):
                 if inc_matrix[j][i] != 0:
                     if first is None:
@@ -29,17 +30,18 @@ def read_inc_matrix(filename):
 
                     if first and second:
                         break
-            
-            if first_e :
+
+            if first_e:
                 matrix[first][second] = first_e
             if second_e:
                 matrix[second][first] = second_e
-    
+
     return matrix
+
 
 def transitive_reduction(matrix):
     out_matrix = copy.deepcopy(matrix)
-    
+
     for i in range(len(matrix)):
         for j in range(len(matrix)):
             for k in range(len(matrix)):
@@ -50,7 +52,8 @@ def transitive_reduction(matrix):
 
     return out_matrix
 
-matrix = read_inc_matrix('graph_task10.txt')
+
+matrix = read_inc_matrix("graph_task10.txt")
 print("Исходная матрица смежности графа G:")
 print("\n".join(" ".join(map(str, row)) for row in matrix))
 print("Для заданного графа G матрица смежности графа G':")

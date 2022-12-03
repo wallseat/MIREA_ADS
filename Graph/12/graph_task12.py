@@ -10,6 +10,7 @@ class Vertex:
         self._index = index
         self.label = label
 
+    @property
     def index(self) -> int:
         return self._index
 
@@ -25,6 +26,7 @@ class Edge:
         self._vertices = (v1, v2)
         self.len = len
 
+    @property
     def vertices(self) -> Tuple[int, int]:
         return self._vertices
 
@@ -35,6 +37,10 @@ class Edge:
 class Graph:
     _vertices: List[Vertex]
     _edges: List[Edge]
+
+    def __init__(self):
+        self._vertices = []
+        self._edges = []
 
     def _init_vertices(self, dim: int):
         self._vertices = []
@@ -229,49 +235,43 @@ class Graph:
     def as_dict(self):
         return {"Vertices": self._vertices, "Edges": self._edges}
 
+    @property
     def vertices(self):
         return self._vertices
 
+    @property
     def edges(self):
         return self._edges
 
 
-def DFS(adj_matrix: list[list[int]]) -> list[list[int]]:
-    def _dfs(node: int, known_nodes: set[int]):
-        paths = []
-        for adj_node, adj in enumerate(adj_matrix[node]):
-            if adj <= 0:
-                continue
-
-            if adj_node in known_nodes:
-                paths.append([node, adj_node])
-                continue
-
-            a = _dfs(adj_node, known_nodes | set([adj_node]))
-
-            paths.extend([[node, *path] for path in a])
-
-        return paths if paths else [[node]]
-
-    known_nodes = set()
-    paths = []
-    for node in range(len(adj_matrix)):
-        if node not in known_nodes:
-            known_nodes.add(node)
-            paths.extend(_dfs(node, set([node])))
-
-    return paths
+def find_minimal_equivalent(adj_matrix: List[List[int]]) -> List[List[int]]:
+    """
+    Функция поиска минимального эквивалентного графа
+    """
+    dim = len(adj_matrix)
+    for k in range(dim):
+        for i in range(dim):
+            for j in range(dim):
+                if (
+                    adj_matrix[i][j] != 0
+                    and adj_matrix[i][k] != 0
+                    and adj_matrix[k][j] != 0
+                ):
+                    adj_matrix[i][j] = 0
+    return adj_matrix
 
 
-def find_cycles(paths: list[list[int]]):
-    return [path for path in paths if path[0] == path[-1]]
+if __name__ == "__main__":
+    graph = Graph()
+    graph.load("graph_task12.json")
 
-
-graph = Graph()
-graph.load("graph_task35.json")
-paths = DFS(graph.to_adj_matrix())
-cycles = find_cycles(paths)
-
-print(f"Количество циклов: {len(cycles)}")
-print(f"Список циклов:")
-print("\n".join(["->".join(map(str, cycle)) for cycle in cycles]))
+    adj_matrix = graph.to_adj_matrix()
+    print(
+        "Матрица смежности:\n"
+        + "\n".join([" ".join([str(j) for j in i]) for i in adj_matrix])
+    )
+    adj_matrix = find_minimal_equivalent(graph.to_adj_matrix())
+    print(
+        "Матрица смежности минимального эквивалентного графа:\n"
+        + "\n".join([" ".join([str(j) for j in i]) for i in adj_matrix])
+    )
