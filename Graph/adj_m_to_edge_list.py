@@ -1,3 +1,6 @@
+import json
+
+
 def load_adj_m(file_path: str):
     with open(file_path, "r") as f:
         matrix = []
@@ -19,9 +22,7 @@ def save_as_edge_list(matrix: list[list[int]], file_path: str):
                 edge_list.append((i, j, l))
 
     with open(file_path, "w") as f:
-        f.write(str(len(matrix)) + "\n")
-        for edge in edge_list:
-            f.write(" ".join(map(str, edge)) + "\n")
+        json.dump({"dim": len(matrix), "format": "edge_list", "data": edge_list}, f)
 
 
 if __name__ == "__main__":

@@ -1,3 +1,6 @@
+import json
+
+
 def load_adj_m(file_path: str):
     with open(file_path, "r") as f:
         matrix = []
@@ -13,12 +16,13 @@ def load_adj_m(file_path: str):
 
 def save_as_adj_list(matrix: list[list[int]], file_path: str):
     with open(file_path, "w") as f:
-        f.write(str(len(matrix)) + "\n")
-        f.write(
-            "\n".join(
-                " ".join(map(str, [i for i, el in enumerate(row) if el]))
-                for row in matrix
-            )
+        json.dump(
+            {
+                "dim": len(matrix),
+                "format": "adj_list",
+                "data": ([[i for i, el in enumerate(row) if el] for row in matrix]),
+            },
+            f,
         )
 
 
