@@ -105,87 +105,41 @@ def swap(stack: Stack, pos1: int, pos2: int):  # 8n^2 + 14n - 12
     push_by_pos(stack, temp, pos2)  # 2n^2 + 4n + 2
 
 
-def slice_stack(
-    stack: Stack[VT], l: int = 0, r: int = -1
-) -> Stack[VT]:  # 4 + 4 + n^2 + 3n - 5 + n + n^2 + 2n = 2n^2 + 6n + 3
-    stack_size = stack.size  # 2
-    slice_stack = Stack[VT]()  # 1
-    swap_stack = Stack[VT]()  # 1
+def simple_choice_sort(
+    stack: Stack,
+) -> Stack:
+    #  1 + n + log(n)*4n^3 + log(n)*6n^2 - log(n)*16n - log(n)*4n^2 - log(n)*6n + log(n)16 + log(n)n - n + 8n^3 + 14n^2 - 12n =
+    # = 4log(n)n^3 + 8n^3 + 2log(n)n^2 + 14n^2 - 22log(n)n - 12n + 16log(n) + 1
+    """Sorts a list of integers in ascending order using the selection sort algorithm."""
+    n = stack.size  # 1
+    for i in range(n):  # n * (
+        min_index = i  # 1
+        for j in range(i + 1, n):  # (n - i - 1) ~= log(n) * (
+            if seek(stack, j) < seek(stack, min_index):  # 4n^2 + 6n - 16
+                min_index = j  # 1
+        swap(stack, i, min_index)  # 8n^2 + 14n - 12
 
-    if r == -1:  # 1
-        r = stack.size - 1  # 3
-
-    for _ in range(stack_size - r - 1):  # (n - r - 1) * (
-        swap_stack.push(stack.pop())  # k + n + 4
-    # ) ~= n^2 + 3n - 5
-
-    for _ in range(r - l + 1):  # (r - l + 1) * (
-        slice_stack.push(stack.top)  # k + 3
-        swap_stack.push(stack.pop())  # s + n + 4
-    # ) ~= n
-
-    for _ in range(swap_stack.size):  # n * (
-        stack.push(swap_stack.pop())  # k + n + 2
-    # ) ~= n^2 + 2n
-
-    return reverse(slice_stack)  # 2n^2 + 2n + 1
-
-
-def reverse(stack: Stack[VT]) -> Stack[VT]:  # 2n^2 + 2n + 1
-    out = Stack[VT]()  # 1
-    for _ in range(stack.size):  # n * (
-        out.push(stack.pop())  # n + n + 2
-    # ) = 2n^2 + 2n
-    return out
+    return stack
 
 
 if __name__ == "__main__":
+    import time
     from random import randint
 
-    stack = Stack[int]()
-    test_data = [randint(-100, 100) for _ in range(20)]
+    tests = 10
+    step = 50
 
-    for el in test_data:
-        stack.push(el)
+    for test_num in range(1, tests + 1):
+        stack = Stack[int]()
+        for _ in range(test_num * step):
+            stack.push(randint(-10000, 10000))
 
-    print_stack(stack)
+        start_time = time.time()
+        stack = simple_choice_sort(stack)
+        total_time = time.time() - start_time
 
-    # 1
-    for i, el in enumerate(test_data):
-        assert seek(stack, i) == el
-
-    # 2
-    test_data.insert(2, 20)
-    push_by_pos(stack, 20, 2)
-
-    for i, el in enumerate(test_data):
-        assert seek(stack, i) == el
-
-    # 3
-    test_data.pop(2)
-    pop_by_pos(stack, 2)
-    for i, el in enumerate(test_data):
-        assert seek(stack, i) == el
-
-    # 4
-    tmp = test_data[2]
-    test_data[2] = test_data[5]
-    test_data[5] = tmp
-
-    swap(stack, 2, 5)
-    for i, el in enumerate(test_data):
-        assert seek(stack, i) == el
-
-    # 5
-    slice = slice_stack(stack, 5, 15)
-    for i, el in enumerate(test_data[5:16]):
-        assert seek(stack, i + 5) == el
-
-    # 6
-    for _ in test_data:
-        stack.pop()
-
-    assert stack.size == 0
-    assert stack.is_empty() == True
-
-    print("All tests passed")
+        print(f"Test: {test_num}")
+        print(f"Elems count: {test_num * step}")
+        print(f"Total time: {total_time}")
+        print(f"N_OP: {stack.n_op}")
+        print("-------------")
