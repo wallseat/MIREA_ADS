@@ -215,19 +215,16 @@ class AVL_BST(Generic[VT]):
 
 
 if __name__ == "__main__":
-    from itertools import chain
     from random import randint
 
     tree_a = AVL_BST[int]()
     tree_b = AVL_BST[int]()
-    tree_c = AVL_BST[int]()
 
     for _ in range(20):
         value = randint(-99, 99)
 
-        if value > 0:
-            tree_a.insert(value)
-        else:
+        tree_a.insert(value)
+        if randint(0, 9) % 3:
             tree_b.insert(value)
 
     print(
@@ -237,7 +234,10 @@ if __name__ == "__main__":
         f"Дерево B в симметричном порядке: {tree_b.traverse_inorder()}, Высота {tree_b.height()}"
     )
 
-    for node in chain(tree_a.traverse_inorder(), tree_b.traverse_inorder()):
-        tree_c.insert(node.value)
+    for node in tree_a.traverse_inorder():
+        if not tree_b.find(node.value):
+            tree_a.remove(node.value)
 
-    print(f"Дерево C: {tree_c.traverse_inorder()}, Высота {tree_c.height()}")
+    print(
+        f"Дерево C полученное исключением из дерева A элементов отсутствующих в дереве B:\n{tree_a.traverse_inorder()}, Высота {tree_a.height()}"
+    )
