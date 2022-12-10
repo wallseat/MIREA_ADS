@@ -46,7 +46,7 @@ class Stack(Generic[VT]):
         return self._stack[self._size - 1]
 
 
-def print_stack(stack: Stack[VT]):
+def print_stack(stack: Stack[VT]) -> None:
     buffer = Stack[VT](max_size=stack.size)
 
     elements = []
@@ -61,7 +61,7 @@ def print_stack(stack: Stack[VT]):
         stack.push(buffer.pop())
 
 
-def seek(stack: Stack[VT], pos: int):  # 28n - 22
+def seek(stack: Stack[VT], pos: int) -> VT:  # 28n - 22
     buffer = Stack[VT](max_size=stack.size)  # 2
     stack_size = stack.size  # 2
 
@@ -80,7 +80,7 @@ def seek(stack: Stack[VT], pos: int):  # 28n - 22
     return el
 
 
-def push_by_pos(stack: Stack[VT], el: VT, pos: int):  # 28n + 9
+def push_by_pos(stack: Stack[VT], el: VT, pos: int) -> None:  # 28n + 9
     buffer = Stack[VT](max_size=stack.size)  # 2
     stack_size = stack.size  # 2
 
@@ -116,7 +116,7 @@ def pop_by_pos(stack: Stack[VT], pos: int) -> VT:  # 28n - 15
     return el
 
 
-def swap(stack: Stack, pos1: int, pos2: int):  # 112n - 12
+def swap(stack: Stack[VT], pos1: int, pos2: int) -> None:  # 112n - 12
     temp = pop_by_pos(stack, pos1)  #  28n - 15
     push_by_pos(stack, pop_by_pos(stack, pos2 - 1), pos1)  # 56n - 6
     push_by_pos(stack, temp, pos2)  # 28n + 9
@@ -132,7 +132,7 @@ def reverse(stack: Stack[VT]) -> Stack[VT]:  # 14n + 2
     return out
 
 
-def slice_stack(stack: Stack[VT], l: int = 0, r: int = -1) -> Stack[VT]:  # 62n + 18
+def slice_(stack: Stack[VT], l: int = 0, r: int = -1) -> Stack[VT]:  # 62n + 18
     stack_size = stack.size  # 2
     slice_stack = Stack[VT](max_size=stack.size)  # 2
     buffer = Stack[VT](max_size=stack.size)  # 2
@@ -159,92 +159,53 @@ def slice_stack(stack: Stack[VT], l: int = 0, r: int = -1) -> Stack[VT]:  # 62n 
     return reverse(slice_stack)  # 14n + 2
 
 
-def merge(stack1: Stack[VT], stack2: Stack[VT]) -> Stack[VT]:  # 74n + 3
-    out = Stack[VT](max_size=stack1.size + stack2.size)  # 1
-
-    while stack1.size > 0 and stack2.size > 0:  # n * (
-        if stack1.top < stack2.top:  # 3
-            out.push(stack1.pop())  # 14
-        else:  # 1
-            out.push(stack2.pop())  # 14
-    # ) = 32n
-
-    while stack1.size > 0:  # n * (
-        out.push(stack1.pop())  # 14
-    # ) = 14n
-
-    while stack2.size > 0:  # n * (
-        out.push(stack2.pop())  # 14
-    # ) = 14n
-
-    out._n_op += stack1.n_op + stack2.n_op
-
-    return reverse(out)  # 14n + 2
-
-
-def fixed_two_way_merge_sort(stack: Stack[VT]) -> Stack[VT]:  # 2n * log(n) + 116n + 13
-    if stack.size <= 1:  # 1
-        return stack  # 1
-
-    stack_size = stack.size  # 2
-    left_stack = Stack[VT](max_size=stack.size)  # 2
-    right_stack = Stack[VT](max_size=stack.size)  # 2
-
-    for _ in range(stack_size // 2):  # (n / 2) * (
-        left_stack.push(stack.pop())  # 14
-    # ) = 7n
-
-    for _ in range(stack_size - stack_size // 2):  # (n / 2) * (
-        right_stack.push(stack.pop())  # 14
-    # ) = 7n
-
-    left_stack = fixed_two_way_merge_sort(left_stack)  # ~= nlog(n)
-    right_stack = fixed_two_way_merge_sort(right_stack)  # ~= nlog(n)
-
-    buff = reverse(merge(left_stack, right_stack))  # 88n + 5
-
-    for _ in range(buff.size):  # n * (
-        stack.push(buff.pop())  # 14
-    # ) = 14n
-
-    stack._n_op += buff.n_op
-
-    return stack
-
-
 if __name__ == "__main__":
-    import sys
-    import time
     from random import randint
 
-    if len(sys.argv) < 2 or sys.argv[1] not in ["example", "tests"]:
-        print(f"Usage: python3 {sys.argv[0]} [example/tests]")
-        exit(1)
+    stack = Stack[int]()
+    test_data = [randint(-100, 100) for _ in range(20)]
 
-    if sys.argv[1] == "example":
-        stack = Stack[int](max_size=20)
-        for _ in range(20):
-            stack.push(randint(-10000, 10000))
+    for el in test_data:
+        stack.push(el)
 
-        fixed_two_way_merge_sort(stack)
-        print_stack(stack)
+    print_stack(stack)
 
-    elif sys.argv[1] == "tests":
-        tests = 10
-        step = 5000
+    # 1
+    for i, el in enumerate(test_data):
+        assert seek(stack, i) == el
 
-        for test_num in range(1, tests + 1):
-            stack = Stack[int](max_size=test_num * step)
+    # 2
+    test_data.insert(2, 20)
+    push_by_pos(stack, 20, 2)
 
-            for _ in range(test_num * step):
-                stack.push(randint(-10000, 10000))
+    for i, el in enumerate(test_data):
+        assert seek(stack, i) == el
 
-            start_time = time.time()
-            fixed_two_way_merge_sort(stack)
-            total_time = time.time() - start_time
+    # 3
+    test_data.pop(2)
+    pop_by_pos(stack, 2)
+    for i, el in enumerate(test_data):
+        assert seek(stack, i) == el
 
-            print(f"Test: {test_num}")
-            print(f"Elements count: {test_num * step}")
-            print(f"Total time: {total_time}")
-            print(f"N_OP: {stack.n_op}")
-            print("-------------")
+    # 4
+    tmp = test_data[2]
+    test_data[2] = test_data[5]
+    test_data[5] = tmp
+
+    swap(stack, 2, 5)
+    for i, el in enumerate(test_data):
+        assert seek(stack, i) == el
+
+    # 5
+    slice = slice_(stack, 5, 15)
+    for i, el in enumerate(test_data[5:16]):
+        assert seek(stack, i + 5) == el
+
+    # 6
+    for _ in test_data:
+        stack.pop()
+
+    assert stack.size == 0
+    assert stack.is_empty() == True
+
+    print("All tests passed")

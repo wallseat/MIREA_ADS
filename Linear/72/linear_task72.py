@@ -110,7 +110,6 @@ def simple_choice_sort(
 ) -> Stack:
     #  1 + n + log(n)*4n^3 + log(n)*6n^2 - log(n)*16n - log(n)*4n^2 - log(n)*6n + log(n)16 + log(n)n - n + 8n^3 + 14n^2 - 12n =
     # = 4log(n)n^3 + 8n^3 + 2log(n)n^2 + 14n^2 - 22log(n)n - 12n + 16log(n) + 1
-    """Sorts a list of integers in ascending order using the selection sort algorithm."""
     n = stack.size  # 1
     for i in range(n):  # n * (
         min_index = i  # 1
