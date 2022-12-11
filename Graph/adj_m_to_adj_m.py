@@ -6,6 +6,8 @@ def load_adj_m(file_path: str):
         matrix = []
         for line in f.readlines():
             row_data = list(map(int, line.split()))
+            if len(row_data) == 1:
+                continue
             matrix.append(row_data)
 
     return matrix
