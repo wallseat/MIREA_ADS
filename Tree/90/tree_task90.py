@@ -6,15 +6,13 @@ VT = TypeVar("VT")
 class Node(Generic[VT]):
     value: VT
 
-    left: Optional["Node[VT]"]
-    right: Optional["Node[VT]"]
+    left_right: List["Node[VT]"]
     height: int
 
     def __init__(self, value: VT):
         self.value = value
 
-        self.left = None
-        self.right = None
+        self.left_right = [None, None]
         self.height = 1
 
     def __repr__(self):
@@ -35,26 +33,28 @@ class AVL_BST(Generic[VT]):
             return root
 
         elif value < root.value:
-            return self._find(root.left, value)
+            return self._find(root.left_right[0], value)
 
         else:
-            return self._find(root.right, value)
+            return self._find(root.left_right[1], value)
 
     def find(self, value: VT) -> Optional[Node[VT]]:
         return self._find(self._root, value)
 
     def _fix_height(self, root: Node[VT]):
-        root.height = 1 + max(self._height(root.left), self._height(root.right))
+        root.height = 1 + max(
+            self._height(root.left_right[0]), self._height(root.left_right[1])
+        )
 
     def _insert(self, root: Node[VT], value: VT) -> Node[VT]:
         if not root:
             return Node(value)
 
         elif value < root.value:
-            root.left = self._insert(root.left, value)
+            root.left_right[0] = self._insert(root.left_right[0], value)
 
         elif value > root.value:
-            root.right = self._insert(root.right, value)
+            root.left_right[1] = self._insert(root.left_right[1], value)
 
         else:
             return root
@@ -63,17 +63,17 @@ class AVL_BST(Generic[VT]):
 
         balance_factor = self._balance_factor(root)
         if balance_factor > 1:
-            if value < root.left.value:
+            if value < root.left_right[0].value:
                 return self._right_rotate(root)
             else:
-                root.left = self._left_rotate(root.left)
+                root.left_right[0] = self._left_rotate(root.left_right[0])
                 return self._right_rotate(root)
 
         if balance_factor < -1:
-            if value > root.right.value:
+            if value > root.left_right[1].value:
                 return self._left_rotate(root)
             else:
-                root.right = self._right_rotate(root.right)
+                root.left_right[1] = self._right_rotate(root.left_right[1])
                 return self._left_rotate(root)
 
         return root
@@ -83,25 +83,25 @@ class AVL_BST(Generic[VT]):
             return root
 
         elif value < root.value:
-            root.left = self._remove(root.left, value)
+            root.left_right[0] = self._remove(root.left_right[0], value)
 
         elif value > root.value:
-            root.right = self._remove(root.right, value)
+            root.left_right[1] = self._remove(root.left_right[1], value)
 
         else:
-            if root.left is None:
-                temp = root.right
+            if root.left_right[0] is None:
+                temp = root.left_right[1]
                 root = None
                 return temp
 
-            elif root.right is None:
-                temp = root.left
+            elif root.left_right[1] is None:
+                temp = root.left_right[0]
                 root = None
                 return temp
 
-            temp = self._min(root.right)
+            temp = self._min(root.left_right[1])
             root.value = temp.value
-            root.right = self._remove(root.right, temp.value)
+            root.left_right[1] = self._remove(root.left_right[1], temp.value)
 
         if root is None:
             return root
@@ -111,25 +111,25 @@ class AVL_BST(Generic[VT]):
         balance_factor = self._balance_factor(root)
 
         if balance_factor > 1:
-            if self._balance_factor(root.left) >= 0:
+            if self._balance_factor(root.left_right[0]) >= 0:
                 return self._right_rotate(root)
             else:
-                root.left = self._left_rotate(root.left)
+                root.left_right[0] = self._left_rotate(root.left_right[0])
                 return self._right_rotate(root)
 
         if balance_factor < -1:
-            if self._balance_factor(root.right) <= 0:
+            if self._balance_factor(root.left_right[1]) <= 0:
                 return self._left_rotate(root)
             else:
-                root.right = self._right_rotate(root.right)
+                root.left_right[1] = self._right_rotate(root.left_right[1])
                 return self._left_rotate(root)
 
         return root
 
     def _left_rotate(self, z: Node[VT]) -> Optional[Node[VT]]:
-        y = z.right
-        z.right = y.left
-        y.left = z
+        y = z.left_right[1]
+        z.left_right[1] = y.left_right[0]
+        y.left_right[0] = z
 
         self._fix_height(z)
         self._fix_height(y)
@@ -137,9 +137,9 @@ class AVL_BST(Generic[VT]):
         return y
 
     def _right_rotate(self, z: Node[VT]) -> Optional[Node[VT]]:
-        y = z.left
-        z.left = y.right
-        y.right = z
+        y = z.left_right[0]
+        z.left_right[0] = y.left_right[1]
+        y.left_right[1] = z
 
         self._fix_height(z)
         self._fix_height(y)
@@ -156,13 +156,13 @@ class AVL_BST(Generic[VT]):
         if not root:
             return 0
 
-        return self._height(root.left) - self._height(root.right)
+        return self._height(root.left_right[0]) - self._height(root.left_right[1])
 
     def _min(self, root: Node[VT]) -> Node[VT]:
-        if root is None or root.left is None:
+        if root is None or root.left_right[0] is None:
             return root
 
-        return self._min(root.left)
+        return self._min(root.left_right[0])
 
     def height(self) -> int:
         return self._height(self._root)
@@ -175,9 +175,9 @@ class AVL_BST(Generic[VT]):
 
     def _traverse_inorder(self, root: Node[VT], nodes_list: List[Node[VT]]):
         if root is not None:
-            self._traverse_inorder(root.left, nodes_list)
+            self._traverse_inorder(root.left_right[0], nodes_list)
             nodes_list.append(root)
-            self._traverse_inorder(root.right, nodes_list)
+            self._traverse_inorder(root.left_right[1], nodes_list)
 
         return nodes_list
 
@@ -186,8 +186,8 @@ class AVL_BST(Generic[VT]):
 
     def _traverse_postorder(self, root: Node[VT], nodes_list: List[Node[VT]]):
         if root is not None:
-            self._traverse_postorder(root.left, nodes_list)
-            self._traverse_postorder(root.right, nodes_list)
+            self._traverse_postorder(root.left_right[0], nodes_list)
+            self._traverse_postorder(root.left_right[1], nodes_list)
             nodes_list.append(root)
 
         return nodes_list
@@ -198,8 +198,8 @@ class AVL_BST(Generic[VT]):
     def _traverse_preorder(self, root: Node[VT], nodes_list: List[Node[VT]]):
         if root is not None:
             nodes_list.append(root)
-            self._traverse_preorder(root.left, nodes_list)
-            self._traverse_preorder(root.right, nodes_list)
+            self._traverse_preorder(root.left_right[0], nodes_list)
+            self._traverse_preorder(root.left_right[1], nodes_list)
 
         return nodes_list
 
@@ -210,14 +210,25 @@ class AVL_BST(Generic[VT]):
 if __name__ == "__main__":
     from random import randint
 
-    tree = AVL_BST[int]()
-    elems = []
+    tree_a = AVL_BST[int]()
+    tree_b = AVL_BST[int]()
+    tree_c = AVL_BST[int]()
 
-    for _ in range(100000):
-        value = randint(-10000, 1000000)
-        tree.insert(value)
-        elems.append(value)
+    for _ in range(20):
+        v = randint(-99, 99)
 
-    print(tree.height())
-    tree.remove(elems[0])
-    print(tree.height())
+        tree_a.insert(v)
+
+        if randint(1, 10) % 3 == 1:
+            tree_b.insert(v)
+
+    print("Дерево А в прямом порядке: " + str(tree_a.traverse_preorder()))
+    print("Дерево В в симметричном порядке: " + str(tree_b.traverse_inorder()))
+
+    for node in tree_a.traverse_preorder():
+        if not tree_b.find(node.value):
+            tree_c.insert(node.value)
+    print(
+        "Дерево С полученное удалением из дерева А всех элементов, которые есть в дереве В: "
+        + str(tree_c.traverse_inorder())
+    )

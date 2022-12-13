@@ -271,7 +271,7 @@ def bfs(matrix: List[List[int]]) -> int:
 
 if __name__ == "__main__":
     graph = Graph()
-    graph.load("graph_task92.json")
+    graph.load("graph_task90.json")
 
     cycles_count = bfs(graph.to_adj_matrix())
 
