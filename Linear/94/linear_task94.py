@@ -222,29 +222,29 @@ if __name__ == "__main__":
         exit(1)
 
     if sys.argv[1] == "example":
-        stack = Stack[int](max_size=20)
+        struct = Stack[int]()
         for _ in range(20):
-            stack.push(randint(-10000, 10000))
+            struct.push(randint(-10000, 10000))
 
-        fixed_two_way_merge_sort(stack)
-        print_stack(stack)
+        fixed_two_way_merge_sort(struct)
+        print_stack(struct)
 
     elif sys.argv[1] == "tests":
         tests = 10
         step = 5000
 
         for test_num in range(1, tests + 1):
-            stack = Stack[int](max_size=test_num * step)
+            struct = Stack[int](max_size=test_num * step)
 
             for _ in range(test_num * step):
-                stack.push(randint(-10000, 10000))
+                struct.push(randint(-10000, 10000))
 
             start_time = time.time()
-            fixed_two_way_merge_sort(stack)
+            fixed_two_way_merge_sort(struct)
             total_time = time.time() - start_time
 
             print(f"Test: {test_num}")
             print(f"Elements count: {test_num * step}")
             print(f"Total time: {total_time}")
-            print(f"N_OP: {stack.n_op}")
+            print(f"N_OP: {struct.n_op}")
             print("-------------")

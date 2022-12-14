@@ -145,40 +145,6 @@ def rotate_right(dequeue: Dequeue[VT]) -> None:  # 23
     dequeue.push_front(dequeue.pop_back())
 
 
-def seek(dequeue: Dequeue[VT], index: int) -> VT:  # 48n + 12
-    if dequeue.is_empty():  # 2
-        raise Exception("Can't seek empty dequeue!")
-
-    if index >= dequeue.size:  # 3
-        raise Exception("Index out of range!")
-
-    if index >= dequeue.size // 2:  # 3
-        for _ in range(dequeue.size - index - 1):  # (n / 2) * (
-            rotate_right(dequeue)  # 23
-        # ) = 12n
-
-        node = dequeue.tail  # 2
-
-        for _ in range(dequeue.size - index - 1):  # (n / 2) * (
-            rotate_left(dequeue)  # 23
-        # ) = 12n
-
-        return node
-
-    else:
-        for _ in range(index):  # (n / 2) * (
-            rotate_left(dequeue)  # 23
-        # ) = 12n
-
-        node = dequeue.head  # 2
-
-        for _ in range(index):  # (n / 2) * (
-            rotate_right(dequeue)  # 23
-        # ) = 12n
-
-        return node
-
-
 def push_by_pos(dequeue: Dequeue[VT], el: VT, pos: int) -> None:  # 24n + 17
     if pos < 0 or pos > dequeue.size:  # 4
         raise Exception("Invalid position argument!")
@@ -241,6 +207,40 @@ def pop_by_pos(dequeue: Dequeue[VT], i: int) -> VT:  # 24n + 17
                 rotate_left(dequeue)
 
         return v
+
+
+def seek(dequeue: Dequeue[VT], index: int) -> VT:  # 48n + 12
+    if dequeue.is_empty():  # 2
+        raise Exception("Can't seek empty dequeue!")
+
+    if index >= dequeue.size:  # 3
+        raise Exception("Index out of range!")
+
+    if index >= dequeue.size // 2:  # 3
+        for _ in range(dequeue.size - index - 1):  # (n / 2) * (
+            rotate_right(dequeue)  # 23
+        # ) = 12n
+
+        node = dequeue.tail  # 2
+
+        for _ in range(dequeue.size - index - 1):  # (n / 2) * (
+            rotate_left(dequeue)  # 23
+        # ) = 12n
+
+        return node
+
+    else:
+        for _ in range(index):  # (n / 2) * (
+            rotate_left(dequeue)  # 23
+        # ) = 12n
+
+        node = dequeue.head  # 2
+
+        for _ in range(index):  # (n / 2) * (
+            rotate_right(dequeue)  # 23
+        # ) = 12n
+
+        return node
 
 
 def swap(dequeue: Dequeue, pos1: int, pos2: int) -> None:  # 92n + 10
@@ -318,56 +318,54 @@ def slice_(dequeue: Dequeue[VT], l: int = 0, r: int = -1) -> Dequeue[VT]:  # 82n
     return buffer
 
 
+def insertion_sort(
+    dequeue: Dequeue[VT],
+) -> Dequeue[VT]:  # 188n^2 * log(n) + 34n * log(n)
+    for i in range(1, dequeue.size):  # n * (
+        for j in range(i, 0, -1):  # log(n) * (
+            if seek(dequeue, j - 1) > seek(dequeue, j):  # 96n + 24
+                swap(dequeue, j - 1, j)  # 92n + 10
+            else:
+                break
+        # ) = 188n * log(n) + 34 * log(n)
+    # ) = 188n^2 * log(n) + 34n * log(n)
+
+    return dequeue
+
+
 if __name__ == "__main__":
+    import sys
+    import time
     from random import randint
 
-    dequeue = Dequeue[int]()
-    test_data = [randint(-100, 100) for _ in range(20)]
+    if len(sys.argv) < 2 or sys.argv[1] not in ["example", "tests"]:
+        print(f"Usage: python3 {sys.argv[0]} [example/tests]")
+        exit(1)
 
-    for el in test_data:
-        dequeue.push_back(el)
+    if sys.argv[1] == "example":
+        struct = Dequeue[int]()
+        for _ in range(20):
+            struct.push_back(randint(-10000, 10000))
 
-    print_dequeue(dequeue)
+        insertion_sort(struct)
+        print_dequeue(struct)
 
-    # 1
-    for i, el in enumerate(test_data):
-        assert seek(dequeue, i) == el
+    elif sys.argv[1] == "tests":
+        tests = 10
+        step = 50
 
-    # 2
-    test_data.insert(2, 20)
-    push_by_pos(dequeue, 20, 2)
+        for test_num in range(1, tests + 1):
+            struct = Dequeue[int]()
 
-    for i, el in enumerate(test_data):
-        assert seek(dequeue, i) == el
+            for _ in range(test_num * step):
+                struct.push_back(randint(-10000, 10000))
 
-    # 3
-    test_data.pop(2)
-    pop_by_pos(dequeue, 2)
-    for i, el in enumerate(test_data):
-        assert seek(dequeue, i) == el
+            start_time = time.time()
+            insertion_sort(struct)
+            total_time = time.time() - start_time
 
-    # 4
-    tmp = test_data[2]
-    test_data[2] = test_data[5]
-    test_data[5] = tmp
-
-    swap(dequeue, 2, 5)
-    for i, el in enumerate(test_data):
-        assert seek(dequeue, i) == el
-
-    # 5
-    sliced = slice_(dequeue, 5, 15)
-    for i, el in enumerate(test_data[5:16]):
-        assert seek(sliced, i) == el
-
-    # 6
-    for _ in test_data[: len(test_data) // 2]:
-        dequeue.pop_front()
-
-    for _ in test_data[len(test_data) // 2 :]:
-        dequeue.pop_back()
-
-    assert dequeue.size == 0
-    assert dequeue.is_empty() == True
-
-    print("All tests passed")
+            print(f"Test: {test_num}")
+            print(f"Elements count: {test_num * step}")
+            print(f"Total time: {total_time}")
+            print(f"N_OP: {struct.n_op}")
+            print("-------------")
