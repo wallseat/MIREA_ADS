@@ -1,5 +1,7 @@
 import json
-from typing import Dict, List, Optional, Set, Tuple
+from typing import Dict, List, Optional, Tuple
+
+_T_ADJ_MATRIX = List[List[int]]
 
 
 class Vertex:
@@ -228,7 +230,7 @@ class Graph:
         else:
             raise Exception(f"Ребра с таким набором вершин не существует! ({v1}, {v2})")
 
-    def to_adj_matrix(self) -> List[List[int]]:
+    def to_adj_matrix(self) -> _T_ADJ_MATRIX:
         adj_matrix = [
             [0 for _ in range(len(self._vertices))] for _ in range(len(self._vertices))
         ]
@@ -249,31 +251,26 @@ class Graph:
         return self._edges
 
 
-def get_cycles_with_fix_len(path_len: int, matrix: List[List[int]]) -> List[List[int]]:
-    def algo(node: int, len_credit: int, known_nodes: Set[int]) -> List[List[int]]:
-        paths: List[List[int]] = []
+def get_cycles_count_dfs(adj_matrix: _T_ADJ_MATRIX) -> int:
+    n = len(adj_matrix)
+    used = [False] * n
+    cycles_count = 0
 
-        for other_node, edge_len in enumerate(matrix[node]):
+    def dfs(v: int) -> None:
+        nonlocal cycles_count
+        used[v] = True
+        for u in range(n):
+            if adj_matrix[v][u] != 0:
+                if not used[u]:
+                    dfs(u)
+                else:
+                    cycles_count += 1
 
-            if not edge_len:
-                continue
+    for i in range(n):
+        if not used[i]:
+            dfs(i)
 
-            if not other_node in known_nodes and len_credit - edge_len > 0:
-                _known_nodes = known_nodes.copy()
-                _known_nodes.add(other_node)
-                _paths = algo(other_node, len_credit - edge_len, _known_nodes)
-                paths.extend([node, *path] for path in _paths if _paths)
-
-            elif other_node in known_nodes and len_credit - edge_len == 0:
-                paths.append([node, other_node])
-
-        return paths
-
-    cycles = []
-    for i in range(len(matrix)):
-        cycles.extend(algo(i, path_len, set([i])))
-
-    return cycles
+    return cycles_count
 
 
 if __name__ == "__main__":
@@ -309,14 +306,15 @@ if __name__ == "__main__":
                 + "\n".join(str(row) for row in graph.to_adj_matrix())
             )
         case "task":
-            cycle_len = input("Введите длину цикла: ")
+            cycles_count = get_cycles_count_dfs(graph.to_adj_matrix())
 
-            if not cycle_len.isdigit():
-                raise Exception("Введена длина цикла не являющаяся числом!")
+            print(f"Количество вершин: {len(graph.vertices)}")
+            print(f"Количество граней: {len(graph.edges)}")
+            print(f"Количество циклов: {cycles_count}")
+            print(
+                f"Цикломатическая сложность графа: {len(graph.edges) - len(graph.vertices) + 2 * cycles_count}"
+            )
 
-            cycle_len = int(cycle_len)
-
-            cycles = get_cycles_with_fix_len(cycle_len, graph.to_adj_matrix())
-
-            print(f"Циклы длины {cycle_len}:")
-            print("\n".join(["->".join(map(str, cycle)) for cycle in cycles]))
+        case _:
+            print_usage()
+            exit(-1)

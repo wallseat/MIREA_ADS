@@ -21,7 +21,7 @@ class Settings(BaseSettings):
 settings = Settings()
 
 
-def upload_to_yd(disk: yadisk.YaDisk, files: List[Path]):
+def upload_to_yd(disk: yadisk.YaDisk, files: List[Path]) -> None:
     for file in files:
         if file.is_file():
             with open(file, "rb") as f:

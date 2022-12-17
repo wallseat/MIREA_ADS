@@ -1,6 +1,8 @@
 import json
 from typing import Dict, List, Optional, Tuple
 
+_T_ADJ_MATRIX = List[List[int]]
+
 
 class Vertex:
     _index: int
@@ -228,7 +230,7 @@ class Graph:
         else:
             raise Exception(f"Ребра с таким набором вершин не существует! ({v1}, {v2})")
 
-    def to_adj_matrix(self) -> List[List[int]]:
+    def to_adj_matrix(self) -> _T_ADJ_MATRIX:
         adj_matrix = [
             [0 for _ in range(len(self._vertices))] for _ in range(len(self._vertices))
         ]
@@ -247,3 +249,43 @@ class Graph:
     @property
     def edges(self) -> List[Edge]:
         return self._edges
+
+
+if __name__ == "__main__":
+    import sys
+
+    def print_usage():
+        print(f"Использование: {sys.argv[0]} <режим> [ИМЯ_ФАЙЛА]")
+        print(
+            "Режимы:\n"
+            "\texample - загружает граф и выводит его компоненты и матрицу смежности\n"
+            "\ttask - решает задачу из вариант"
+        )
+
+    if len(sys.argv) < 3:
+        print_usage()
+        exit(-1)
+
+    mode, filename, *_ = sys.argv[1:]
+
+    graph = Graph()
+    try:
+        graph.load(filename)
+    except Exception as e:
+        print(e)
+        exit(-1)
+
+    match mode:
+        case "example":
+            print("Ребра графа:\n" + "\n".join(str(e) for e in graph.edges))
+            print("Вершины графа:\n" + "\n".join(str(v) for v in graph.vertices))
+            print(
+                "Матрица смежности:\n"
+                + "\n".join(str(row) for row in graph.to_adj_matrix())
+            )
+        case "task":
+            pass
+
+        case _:
+            print_usage()
+            exit(-1)
