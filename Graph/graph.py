@@ -2,6 +2,7 @@ import json
 from typing import Dict, List, Optional, Tuple
 
 _T_ADJ_MATRIX = List[List[int]]
+_T_PATH = List[int]
 
 
 class Vertex:

@@ -195,3 +195,29 @@ class RandomizedBST(Generic[VT]):
 
     def traverse_preorder(self) -> List[Node[VT]]:
         return self._traverse_preorder(self._root, [])
+
+
+if __name__ == "__main__":
+    from random import randint
+
+    tree_a = RandomizedBST[int]()
+    tree_b = RandomizedBST[int]()
+
+    for _ in range(25):
+        value = randint(-99, 99)
+
+        tree_a.insert(value)
+        if randint(13, 54) % 3 == 2:
+            tree_b.insert(value)
+
+    print("Дерево А в прямом порядке: " + str(tree_a.traverse_preorder()))
+    print("Дерево В в симметричном порядке: " + str(tree_b.traverse_inorder()))
+
+    for node in tree_a.traverse_inorder():
+        if not tree_b.find(node.value):
+            tree_a.remove(node.value)
+
+    print(
+        "Дерево А в прямом порядке после удаления элементов, которых нет в дереве В: "
+        + str(tree_a.traverse_preorder())
+    )
