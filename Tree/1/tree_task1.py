@@ -1,159 +1,152 @@
-import graphviz
+from typing import Generic, List, Optional, TypeVar
+
+VT = TypeVar("VT")
 
 
-class Node:
-    def __init__(self, item):
-        self.key = item
-        self.left = self.right = None
+class Node(Generic[VT]):
+    left: Optional["Node[VT]"]
+    right: Optional["Node[VT]"]
+    parent: Optional["Node[VT]"]
+    value: VT
+
+    def __init__(self, value: VT):
+        self.value = value
+        self.left = None
+        self.right = None
         self.parent = None
 
+    def __repr__(self):
+        return str(self.value)
 
-class BinaryTree:
+
+class BST(Generic[VT]):
+    _root: Optional[Node[VT]]
+
     def __init__(self):
-        self.root = None
-        self.have_root = False
-        self.vis_buff = []
+        self._root = None
 
-    def visualize(self, name):
-        dot = graphviz.Digraph(comment="Binary Tree")
-        self.vis_buff_filling(self.root)
+    def _find(self, root: Node[VT], value: VT) -> Optional[Node[VT]]:
+        if root is None or root.value == value:
+            return root
 
-        dot.edges(self.vis_buff)
-        dot.render(f"output/{name}.gv", view=True)
+        elif value < root.value:
+            return self._find(root.left, value)
 
-    def vis_buff_filling(self, root) -> None:
-        if not root is None:
-            try:
-                self.vis_buff.append([str(root.parent.key), str(root.key)])
-            except:
-                pass
-            self.vis_buff_filling(root.left)
-            self.vis_buff_filling(root.right)
+        else:
+            return self._find(root.right, value)
 
-    def direct_traversal(self, root) -> None:
-        if not root is None:
-            print("(", root.key, ") ", end="")
-            self.direct_traversal(root.left)
-            self.direct_traversal(root.right)
+    def find(self, value) -> Optional[Node[VT]]:
+        return self._find(self._root, value)
 
-    def symmetric_traversal(self, root) -> None:
-        if not root is None:
-            self.symmetric_traversal(root.left)
-            print("(", root.key, ") ", end="")
-            self.symmetric_traversal(root.right)
+    def _insert(self, root: Node[VT], value: VT) -> Optional[Node[VT]]:
+        if root is None:
+            return Node(value)
 
-    def reverse_traversal(self, root) -> None:
-        if not root is None:
-            self.reverse_traversal(root.left)
-            self.reverse_traversal(root.right)
-            print("(", root.key, ") ", end="")
+        if value < root.value:
+            root.left = self._insert(root.left, value)
+            root.left.parent = root
 
-    def direct_tree_insertion(self, root_from) -> None:
-        if not root_from is None:
-            self.insert(self.root, root_from.key)
-            self.direct_tree_insertion(root_from.left)
-            self.direct_tree_insertion(root_from.right)
+        elif value > root.value:
+            root.right = self._insert(root.right, value)
+            root.right.parent = root
 
-    def symmetric_tree_insertion(self, root_from) -> None:
-        if not root_from is None:
-            self.symmetric_tree_insertion(root_from.left)
-            self.insert(self.root, root_from.key)
-            self.symmetric_tree_insertion(root_from.right)
+        return root
 
-    def reverse_tree_insertion(self, root_from) -> None:
-        if not root_from is None:
-            self.reverse_tree_insertion(root_from.left)
-            self.reverse_tree_insertion(root_from.right)
-            self.insert(self.root, root_from.key)
+    def insert(self, value: VT):
+        self._root = self._insert(self._root, value)
 
-    def insert(self, node, key):
+    def _find_min(self, root: Node[VT]) -> Node[VT]:
+        if root.left is not None:
+            return self._find_min(root.left)
+        else:
+            return root
 
-        if self.have_root == False:
-            self.have_root = True
-            self.root = self.insert(self.root, key)
+    def _remove(self, root: Node[VT], value: VT) -> Optional[Node[VT]]:
+        if root is None:
+            return None
 
-        if node is None:
-            return Node(key)
+        if value < root.value:
+            root.left = self._remove(root.left, value)
+            if root.left:
+                root.left.parent = root
 
-        if key < node.key:
-            left_son = self.insert(node.left, key)
-            node.left = left_son
+            return root
+        elif value > root.value:
+            root.right = self._remove(root.right, value)
+            if root.right:
+                root.right.parent = root
 
-            left_son.parent = node
-        elif key > node.key:
-            right_brother = self.insert(node.right, key)
-            node.right = right_brother
+            return root
 
-            right_brother.parent = node
+        if root.left is None:
+            return root.right
+        elif root.right is None:
+            return root.left
+        else:
+            min_value = self._find_min(root.right).value
+            root.value = min_value
+            root.right = self._remove(root.right, min_value)
+            return root
 
-        return node
+    def remove(self, value: VT):
+        self._root = self._remove(self._root, value)
 
+    def _traverse_inorder(self, root: Node[VT], nodes_List: List[Node[VT]]):
+        if root is not None:
+            self._traverse_inorder(root.left, nodes_List)
+            nodes_List.append(root)
+            self._traverse_inorder(root.right, nodes_List)
 
-# Дерево А:
-# 	   70
-# 	  /	 \
-# 	50	  90
-#  /  \  /  \
-# 40  60 80  100
+        return nodes_List
 
-tree_A = BinaryTree()
-tree_A.insert(tree_A.root, 70)
-tree_A.insert(tree_A.root, 50)
-tree_A.insert(tree_A.root, 40)
-tree_A.insert(tree_A.root, 60)
-tree_A.insert(tree_A.root, 90)
-tree_A.insert(tree_A.root, 80)
-tree_A.insert(tree_A.root, 100)
+    def traverse_inorder(self) -> List[Node[VT]]:
+        return self._traverse_inorder(self._root, [])
 
-# Дерево B:
-# 	     75
-# 	   /   \
-# 	  55    95
-#    /  \  /  \
-#   45  65 85  105
-#  /
-# 35
+    def _traverse_postorder(self, root: Node[VT], nodes_List: List[Node[VT]]):
+        if root is not None:
+            self._traverse_inorder(root.left, nodes_List)
+            self._traverse_inorder(root.right, nodes_List)
+            nodes_List.append(root)
 
-tree_B = BinaryTree()
+        return nodes_List
+
+    def traverse_postorder(self) -> List[Node[VT]]:
+        return self._traverse_postorder(self._root, [])
+
+    def _traverse_preorder(self, root: Node[VT], nodes_List: List[Node[VT]]):
+        if root is not None:
+            nodes_List.append(root)
+            self._traverse_inorder(root.left, nodes_List)
+            self._traverse_inorder(root.right, nodes_List)
+
+        return nodes_List
+
+    def traverse_preorder(self) -> List[Node[VT]]:
+        return self._traverse_preorder(self._root, [])
 
 
-tree_B.insert(tree_B.root, 75)
-tree_B.insert(tree_B.root, 55)
-tree_B.insert(tree_B.root, 45)
-tree_B.insert(tree_B.root, 65)
-tree_B.insert(tree_B.root, 35)
-tree_B.insert(tree_B.root, 95)
-tree_B.insert(tree_B.root, 85)
-tree_B.insert(tree_B.root, 105)
+if __name__ == "__main__":
 
+    from random import randint
 
-tree_C = BinaryTree()
+    tree_a = BST[int]()
+    tree_b = BST[int]()
 
-# Дерево C:
-# 	            70
-# 	     /             \
-#       50              90
-#      /  \            /  \
-#     40     60     80     100
-#    /  \   /  \   /  \    /  \
-#   35  45 55  65 75   85 95  105
+    for _ in range(20):
+        value = randint(-99, 99)
 
+        if randint(0, 10) % 3 == 1:
+            tree_a.insert(value)
+        else:
+            tree_b.insert(value)
 
-print("\nСимметричный обход:")
-tree_A.symmetric_traversal(tree_A.root)
-print("\nПрямой обход :")
-tree_A.direct_traversal(tree_A.root)
-print("\nОбратный обход: ")
-tree_A.reverse_traversal(tree_A.root)
+    print("Дерево А в обратном порядке:\n" + str(tree_a.traverse_postorder()))
+    print("Дерево В в симметричном порядке:\n" + str(tree_b.traverse_inorder()))
 
+    for node in tree_b.traverse_preorder():
+        tree_a.insert(node.value)
 
-print("\nДобавление элементов одного дерева в другое в прямом обходе: ")
-tree_C.direct_tree_insertion(tree_A.root)
-tree_C.direct_tree_insertion(tree_B.root)
-
-tree_C.direct_traversal(tree_C.root)
-
-print("\nВизуализация дерева: ")
-tree_A.visualize("A_binary_tree")
-tree_B.visualize("B_binary_tree")
-tree_C.visualize("C_binary_tree")
+    print(
+        "Дерево А после добавления элементов дерева В в прямом порядке:\n"
+        + str(tree_a.traverse_inorder())
+    )

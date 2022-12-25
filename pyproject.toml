@@ -10,6 +10,8 @@ readme = "README.md"
 python = "^3.10"
 yadisk = "^1.2.16"
 pydantic = {extras = ["dotenv"], version = "^1.10.2"}
+docxtpl = "^0.16.4"
+pillow = "^9.3.0"
 
 [tool.poetry.group.dev.dependencies]
 black = "^22.12.0"
