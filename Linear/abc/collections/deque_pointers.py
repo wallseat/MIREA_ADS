@@ -1,4 +1,4 @@
-from typing import Generic, Optional, TypeVar
+from typing import Generic, Optional, TypeVar, List
 
 VT = TypeVar("VT")
 
@@ -27,13 +27,10 @@ class Dequeue(Generic[VT]):
         self._size = 0
         self._n_op = 0
 
-    def is_empty(self) -> bool:  # 2
-        return self._size == 0
-
     def push_back(self, value: VT) -> None:  # 11
         node = Node[VT](value)  # 2
 
-        if self.is_empty():  # 2
+        if self.empty:  # 2
             self._head = node  # 2
             self._tail = node  # 2
 
@@ -53,7 +50,7 @@ class Dequeue(Generic[VT]):
     def push_front(self, value: VT) -> None:  # 11
         node = Node[VT](value)
 
-        if self.is_empty():  # 2
+        if self.empty:  # 2
             self._head = node  # 2
             self._tail = node  # 2
 
@@ -71,7 +68,7 @@ class Dequeue(Generic[VT]):
         self._n_op += 1
 
     def pop_back(self) -> VT:  # 12
-        if self.is_empty():
+        if self.empty:
             raise Exception("Can't pop from empty dequeue!")
 
         node = self._tail  # 2
@@ -91,7 +88,7 @@ class Dequeue(Generic[VT]):
         return node.value
 
     def pop_front(self) -> VT:  # 12
-        if self.is_empty():
+        if self.empty:
             raise Exception("Can't pop from empty dequeue!")
 
         node = self._head  # 2
@@ -126,6 +123,10 @@ class Dequeue(Generic[VT]):
     @property
     def n_op(self) -> int:
         return self._n_op
+    
+    @property
+    def empty(self) -> bool:  # 2
+        return self._size == 0
 
 
 def print_dequeue(dequeue: Dequeue[VT]) -> None:
@@ -146,7 +147,7 @@ def rotate_right(dequeue: Dequeue[VT]) -> None:  # 23
 
 
 def seek(dequeue: Dequeue[VT], index: int) -> VT:  # 48n + 12
-    if dequeue.is_empty():  # 2
+    if dequeue.empty:  # 2
         raise Exception("Can't seek empty dequeue!")
 
     if index >= dequeue.size:  # 3
@@ -242,6 +243,17 @@ def pop_by_pos(dequeue: Dequeue[VT], i: int) -> VT:  # 24n + 17
 
         return v
 
+def push_front(dequeue: Dequeue[VT], el: VT) -> None:  # 11
+    dequeue.push_front(el)
+
+def push_back(dequeue: Dequeue[VT], el: VT) -> None:  # 11
+    dequeue.push_back(el)
+    
+def pop_front(dequeue: Dequeue[VT]) -> VT:  # 12
+    return dequeue.pop_front()
+
+def pop_back(dequeue: Dequeue[VT]) -> VT:  # 12
+    return dequeue.pop_back()
 
 def swap(dequeue: Dequeue, pos1: int, pos2: int) -> None:  # 92n + 10
     left_el_pos, right_el_pos = min(pos1, pos2), max(pos1, pos2)  # 4
@@ -318,56 +330,105 @@ def slice_(dequeue: Dequeue[VT], l: int = 0, r: int = -1) -> Dequeue[VT]:  # 82n
     return buffer
 
 
-if __name__ == "__main__":
-    from random import randint
+from random import randint  # ignore: E402
 
-    dequeue = Dequeue[int]()
-    test_data = [randint(-100, 100) for _ in range(20)]
+import pytest  # ignore: E402
 
-    for el in test_data:
-        dequeue.push_back(el)
+Collection = Dequeue[int]
 
-    print_dequeue(dequeue)
 
-    # 1
-    for i, el in enumerate(test_data):
-        assert seek(dequeue, i) == el
+@pytest.fixture
+def collection() -> Collection:
+    return Collection()
 
-    # 2
-    test_data.insert(2, 20)
-    push_by_pos(dequeue, 20, 2)
 
-    for i, el in enumerate(test_data):
-        assert seek(dequeue, i) == el
+@pytest.fixture
+def data(collection: Collection) -> List:
+    data = [randint(-100, 100) for _ in range(20)]
+    for el in data:
+        push_back(collection, el)
 
-    # 3
-    test_data.pop(2)
-    pop_by_pos(dequeue, 2)
-    for i, el in enumerate(test_data):
-        assert seek(dequeue, i) == el
+    return data
 
-    # 4
-    tmp = test_data[2]
-    test_data[2] = test_data[5]
-    test_data[5] = tmp
 
-    swap(dequeue, 2, 5)
-    for i, el in enumerate(test_data):
-        assert seek(dequeue, i) == el
+def test_seek(data: List, collection: Collection):
+    for i, el in enumerate(data):
+        assert seek(collection, i) == el
 
-    # 5
-    sliced = slice_(dequeue, 5, 15)
-    for i, el in enumerate(test_data[5:16]):
-        assert seek(sliced, i) == el
 
-    # 6
-    for _ in test_data[: len(test_data) // 2]:
-        dequeue.pop_front()
+def test_push_by_pos(data: List, collection: Collection):
+    data.insert(2, 20)
+    push_by_pos(collection, 20, 2)
 
-    for _ in test_data[len(test_data) // 2 :]:
-        dequeue.pop_back()
+    for i, el in enumerate(data):
+        assert seek(collection, i) == el
 
-    assert dequeue.size == 0
-    assert dequeue.is_empty() == True
 
-    print("All tests passed")
+def test_pop_by_pos(data: List, collection: Collection):
+    data.pop(2)
+    pop_by_pos(collection, 2)
+
+    for i, el in enumerate(data):
+        assert seek(collection, i) == el
+
+
+def test_push_front(data: List, collection: Collection):
+    data.insert(0, 20)
+    push_front(collection, 20)
+
+    for i, el in enumerate(data):
+        assert seek(collection, i) == el
+
+
+def test_push_back(data: List, collection: Collection):
+    data.append(20)
+    push_back(collection, 20)
+
+    for i, el in enumerate(data):
+        assert seek(collection, i) == el
+
+
+def test_pop_front(data: List, collection: Collection):
+    d_el = data.pop(0)
+    c_el = pop_front(collection)
+
+    assert d_el == c_el
+
+    for i, el in enumerate(data):
+        assert seek(collection, i) == el
+
+
+def test_pop_back(data: List, collection: Collection):
+    d_el = data.pop()
+    c_el = pop_back(collection)
+
+    assert d_el == c_el
+
+    for i, el in enumerate(data):
+        assert seek(collection, i) == el
+
+
+def test_swap(data: List, collection: Collection):
+    data[2], data[5] = data[5], data[2]
+    swap(collection, 2, 5)
+
+    for i, el in enumerate(data):
+        assert seek(collection, i) == el
+
+
+def test_slice(data: List, collection: Collection):
+    slice = data[5:16]
+    slice_stack = slice_(collection, 5, 15)
+
+    for i, el in enumerate(slice):
+        assert seek(slice_stack, i) == el
+
+    for i, el in enumerate(data):
+        assert seek(collection, i) == el
+
+
+def test_empty(collection: Collection):
+    while not collection.empty:
+        collection.pop()
+
+    assert collection.size == 0

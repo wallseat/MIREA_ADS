@@ -204,10 +204,6 @@ def data(collection: Collection) -> List:
 
 
 def test_seek(data: List, collection: Collection):
-    print(data, data[0])
-    print_stack(collection)
-    print(seek(collection, 0))
-
     for i, el in enumerate(data):
         assert seek(collection, i) == el
 
