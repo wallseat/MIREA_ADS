@@ -1,26 +1,7 @@
-VT = type
+from ICollection import VT, Collection, seek, swap
 
 
-class Collection:
-    def pop():
-        ...
-
-    def push():
-        ...
-
-    @property
-    def size():
-        ...
-
-
-def swap():
-    pass
-
-
-def seek():
-    pass
-
-
+# $DEF$
 def shell_sort(collection: Collection[VT]) -> Collection[VT]:
     last_index = collection.size - 1
     step = collection.size // 2
@@ -35,3 +16,8 @@ def shell_sort(collection: Collection[VT]) -> Collection[VT]:
             # ) =
         step //= 2
     # ) =
+
+    return collection
+
+
+# $ENDEF$

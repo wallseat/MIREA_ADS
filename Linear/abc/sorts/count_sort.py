@@ -1,46 +1,33 @@
-VT = type
+from ICollection import VT, Collection, push_back, seek
 
 
-class Collection:
-    def pop():
-        ...
+# $DEF$
+def counting_sort(collection: Collection[VT]) -> Collection[VT]:
+    max_ = seek(collection, 0)
+    min_ = max_
 
-    def push():
-        ...
+    buffer = Collection[VT]()
 
-    @property
-    def size():
-        ...
+    while not collection.empty:
+        el = collection.pop()
+        if el > max_:
+            max_ = el
+        if el < min_:
+            min_ = el
+        buffer.push(el)
+
+    counter = [0] * (max_ - min_ + 1)
+
+    while not buffer.empty:
+        el = buffer.pop()
+        counter[el - min_] += 1
+
+    for i, count in enumerate(counter):
+        if count:
+            for _ in range(count):
+                push_back(collection, i + min_)
+
+    return collection
 
 
-def swap():
-    pass
-
-
-def seek():
-    pass
-
-
-def counting_sort(collection: Collection[VT]) -> Collection[VT]:  # 4n^2 + 38n + 4
-    max_ = seek(collection, 0)  # 2
-    min_ = max_  # 2
-    for _ in range(collection.size):  # n
-        el = collection.pop()  # 7
-        if el > max_:  # 1
-            max_ = el  # 1
-        if el < min_:  # 1
-            min_ = el  # 1
-        collection.push(el)  # 2n + 9
-    # ) = 2n^2 + 20n
-
-    buffer = [0] * (max_ - min_ + 1)  # 1
-    for _ in range(collection.size):  # n * (
-        el = collection.pop()  # 7
-        buffer[el - min_] += 1  # 2
-    # ) = 9n
-
-    for i in range(len(buffer)):  # n * (
-        for _ in range(buffer[i]):  # k * (
-            collection.push(i + min_)  # 2n + 9
-        # ) = 2n +9
-    # ) = 2n^2 + 9n
+# $ENDEF$
