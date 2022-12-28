@@ -1,3 +1,5 @@
+# $Collection: Queue$
+# $DEF$
 from typing import Generic, List, TypeVar
 
 VT = TypeVar("VT")
@@ -5,41 +7,43 @@ VT = TypeVar("VT")
 
 class Queue(Generic[VT]):
     _queue: List[VT]
+    _array_size: int
+
     _bias: int
     _size: int
-    _max_size: int
     _n_op: int
 
-    def __init__(self, max_size: int = 10000) -> None:
-        self._queue = [None for _ in range(max_size)]
-        self._max_size = max_size
+    def __init__(self) -> None:
+        self._queue = [0]
+        self._array_size = 1
+
         self._size = 0
         self._n_op = 0
         self._bias = 0
 
-    def push(self, value: VT) -> None:  # 8
-        if self._size == self._max_size:  # 3
-            raise RuntimeError("Queue overflow")
+    def push(self, value: VT) -> None:  # 13
+        if self._size == self._array_size:  # 3
+            self._queue += [0] * self._array_size  # 3
+            self._array_size *= 2  # 2
 
-        self._queue[(self._size + self._bias) % self._max_size] = value  # 3
+        self._queue[(self._size + self._bias) % self._array_size] = value  # 3
         self._size += 1  # 2
 
-        self._n_op += 8
+        self._n_op += 13
 
-    def pop(self) -> VT:  # 12
-
-        if self.is_empty():
-            raise Exception("Can't pop from empty queue!")
+    def pop(self) -> VT:  # 14
+        assert not self.empty, "Can't pop from empty queue!"  # 2
 
         el = self._queue[self._bias]  # 4
         self._size -= 1  # 2
-        self._bias = (self._bias + 1) % self._max_size  # 6
+        self._bias = (self._bias + 1) % self._array_size  # 6
 
-        self._n_op += 12
+        self._n_op += 14
 
         return el
 
-    def is_empty(self) -> bool:  # 2
+    @property
+    def empty(self) -> bool:  # 2
         return self._size == 0
 
     @property
@@ -47,11 +51,19 @@ class Queue(Generic[VT]):
         return self._size
 
     @property
-    def tail(self) -> VT:  # 8
+    def tail(self) -> VT:  # 10
+        assert not self.empty, "Can't get head from empty dequeue!"  # 2
+
+        self._n_op += 10
+
         return self._queue[(self._size - 1 + self._bias) % self._max_size]
 
     @property
-    def head(self) -> VT:  # 3
+    def head(self) -> VT:  # 5
+        assert not self.empty, "Can't get tail from empty dequeue!"  # 2
+
+        self._n_op += 5
+
         return self._queue[self._bias]
 
     @property
@@ -69,130 +81,207 @@ def print_queue(queue: Queue[VT]):
     print("Queue[" + ", ".join(map(str, elements)) + "]")
 
 
-def rotate(queue: Queue[VT]) -> None:  # 20
-    queue.push(queue.pop())  # 20
+def rotate(queue: Queue[VT]) -> None:  # 27
+    queue.push(queue.pop())  # 27
 
 
-def seek(queue: Queue[VT], pos: int) -> VT:  # 40n + 20
+def seek(queue: Queue[VT], pos: int) -> VT:  # 54n + 32
+    assert pos <= queue.size and pos >= 0, "Invalid position!"  # 5
+
     for _ in range(pos):  # n * (
-        rotate(queue)  # 20
-    # ) = 20n
+        rotate(queue)  # 27
+    # ) = 27n
 
-    el = queue.pop()  # 12
-    queue.push(el)  # 8
+    el = queue.pop()  # 14
+    queue.push(el)  # 13
 
     for _ in range(queue.size - pos - 1):  # n * (
-        rotate(queue)  # 20
-    # ) = 20n
+        rotate(queue)  # 27
+    # ) = 27n
 
     return el
 
 
-def pop_by_pos(queue: Queue[VT], pos: int) -> VT:  # 40n + 12
-    for _ in range(pos):  # n * (
-        rotate(queue)  # 20
-    # ) = 20n
+def pop_by_pos(queue: Queue[VT], pos: int) -> VT:  # 54n + 19
+    assert pos <= queue.size and pos >= 0, "Invalid position!"  # 5
 
-    el = queue.pop()  # 12
+    for _ in range(pos):  # n * (
+        rotate(queue)  # 27
+    # ) = 27n
+
+    el = queue.pop()  # 14
 
     for _ in range(queue.size - pos):  # n * (
-        rotate(queue)  # 20
-    # ) = 20n
+        rotate(queue)  # 27
+    # ) = 27n
 
     return el
 
 
-def push_by_pos(queue: Queue[VT], el: VT, pos: int) -> None:  # 40n + 10
-    if pos >= queue.size:  # 2
-        queue.push(el)  # 8
-        return
+def push_by_pos(queue: Queue[VT], el: VT, pos: int) -> None:  # 54n + 18
+    assert pos <= queue.size and pos >= 0, "Invalid position!"  # 5
 
     for _ in range(pos):  # n * (
-        rotate(queue)  # 20
-    # ) = 20n
+        rotate(queue)  # 27
+    # ) = 27n
 
-    queue.push(el)  # 8
+    queue.push(el)  # 13
 
     for _ in range(queue.size - pos - 1):  # n * (
-        rotate(queue)  # 20
-    # ) = 20n
+        rotate(queue)  # 27
+    # ) = 27n
 
 
-def swap(queue: Queue[VT], pos1: int, pos2: int) -> None:  #  160n + 46
-    temp = pop_by_pos(queue, pos1)  # 40n + 13
-    push_by_pos(queue, pop_by_pos(queue, pos2 - 1), pos1)  # 80 + 23
-    push_by_pos(queue, temp, pos2)  # 40n + 10
+def push_back(queue: Queue[VT], el: VT) -> None:  # 13
+    queue.push(el)  # 13
 
 
-def slice_(queue: Queue[VT], l: int = 0, r: int = -1) -> Queue[VT]:  # 68n + 6
-    buff = Queue[VT](max_size=queue.size)  # 2
+def push_front(queue: Queue[VT], el: VT) -> None:  # 27n + 13
+    queue.push(el)  # 13
+    for _ in range(queue.size - 1):  # n * (
+        rotate(queue)  # 27
+    # ) = 27n
+
+
+def pop_back(queue: Queue[VT]) -> VT:  # 27n + 14
+    for _ in range(queue.size - 1):  # n * (
+        rotate(queue)  # 27
+    # ) = 27n
+    return queue.pop()  # 14
+
+
+def pop_front(queue: Queue[VT]) -> VT:  # 14
+    return queue.pop()  # 14
+
+
+def swap(queue: Queue[VT], pos1: int, pos2: int) -> None:  #  216n + 74
+    temp = pop_by_pos(queue, pos1)  # 54n + 19
+    push_by_pos(queue, pop_by_pos(queue, pos2 - 1), pos1)  # 108n + 37
+    push_by_pos(queue, temp, pos2)  # 54n + 18
+
+
+def slice_(queue: Queue[VT], l: int = 0, r: int = -1) -> Queue[VT]:  # 99n + 6
+    buff = Queue[VT]()  # 2
 
     if r == -1:  # 1
         r = queue.size - 1  # 3
 
     for _ in range(l):  # n * (
-        rotate(queue)  # 20
-    # ) = 20n
+        rotate(queue)  # 27
+    # ) = 27n
 
     for _ in range(r - l + 1):  # n * (
-        buff.push(queue.head)  # 8
-        rotate(queue)  # 20
-    # ) = 28n
+        buff.push(queue.head)  # 18
+        rotate(queue)  # 27
+    # ) = 45n
 
     for _ in range(queue.size - r - 1):  # n * (
-        rotate(queue)  # 20
-    # ) = 20n
+        rotate(queue)  # 27
+    # ) = 27n
 
     return buff
 
 
-if __name__ == "__main__":
-    from random import randint
+# $ENDEF$
+from random import randint  # ignore: E402
 
-    queue = Queue[int]()
-    test_data = [randint(-100, 100) for _ in range(20)]
+import pytest  # ignore: E402
 
-    for el in test_data:
-        queue.push(el)
+Collection = Queue[int]
 
-    print_queue(queue)
 
-    # 1
-    for i, el in enumerate(test_data):
-        assert seek(queue, i) == el
+@pytest.fixture
+def collection() -> Collection:
+    return Collection()
 
-    # 2
-    test_data.insert(2, 20)
-    push_by_pos(queue, 20, 2)
 
-    for i, el in enumerate(test_data):
-        assert seek(queue, i) == el
+@pytest.fixture
+def data(collection: Collection) -> List:
+    data = [randint(-100, 100) for _ in range(20)]
+    for el in data:
+        push_back(collection, el)
 
-    # 3
-    test_data.pop(2)
-    pop_by_pos(queue, 2)
-    for i, el in enumerate(test_data):
-        assert seek(queue, i) == el
+    return data
 
-    # 4
-    tmp = test_data[2]
-    test_data[2] = test_data[5]
-    test_data[5] = tmp
 
-    swap(queue, 2, 5)
-    for i, el in enumerate(test_data):
-        assert seek(queue, i) == el
+def test_seek(data: List, collection: Collection):
+    for i, el in enumerate(data):
+        assert seek(collection, i) == el
 
-    # 5
-    slice = slice_(queue, 5, 15)
-    for i, el in enumerate(test_data[5:16]):
-        assert seek(queue, i + 5) == el
 
-    # 6
-    for _ in test_data:
-        queue.pop()
+def test_push_by_pos(data: List, collection: Collection):
+    data.insert(2, 20)
+    push_by_pos(collection, 20, 2)
 
-    assert queue.size == 0
-    assert queue.is_empty() == True
+    for i, el in enumerate(data):
+        assert seek(collection, i) == el
 
-    print("All tests passed")
+
+def test_pop_by_pos(data: List, collection: Collection):
+    data.pop(2)
+    pop_by_pos(collection, 2)
+
+    for i, el in enumerate(data):
+        assert seek(collection, i) == el
+
+
+def test_push_front(data: List, collection: Collection):
+    data.insert(0, 20)
+    push_front(collection, 20)
+
+    for i, el in enumerate(data):
+        assert seek(collection, i) == el
+
+
+def test_push_back(data: List, collection: Collection):
+    data.append(20)
+    push_back(collection, 20)
+
+    for i, el in enumerate(data):
+        assert seek(collection, i) == el
+
+
+def test_pop_front(data: List, collection: Collection):
+    d_el = data.pop(0)
+    c_el = pop_front(collection)
+
+    assert d_el == c_el
+
+    for i, el in enumerate(data):
+        assert seek(collection, i) == el
+
+
+def test_pop_back(data: List, collection: Collection):
+    d_el = data.pop()
+    c_el = pop_back(collection)
+
+    assert d_el == c_el
+
+    for i, el in enumerate(data):
+        assert seek(collection, i) == el
+
+
+def test_swap(data: List, collection: Collection):
+    data[2], data[5] = data[5], data[2]
+    swap(collection, 2, 5)
+
+    for i, el in enumerate(data):
+        assert seek(collection, i) == el
+
+
+def test_slice(data: List, collection: Collection):
+    slice = data[5:16]
+    slice_stack = slice_(collection, 5, 15)
+
+    for i, el in enumerate(slice):
+        assert seek(slice_stack, i) == el
+
+    for i, el in enumerate(data):
+        assert seek(collection, i) == el
+
+
+def test_empty(collection: Collection):
+    while not collection.empty:
+        collection.pop()
+
+    assert collection.size == 0

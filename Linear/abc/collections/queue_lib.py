@@ -1,5 +1,7 @@
+# $Collection: Queue$
+# $DEF$
 from queue import SimpleQueue
-from typing import TypeVar
+from typing import List, TypeVar
 
 VT = TypeVar("VT")
 
@@ -16,14 +18,17 @@ class Queue(SimpleQueue):
         self.put(el)  # 1
         self._n_op += 1
 
-    def pop(self) -> VT:  # 1
+    def pop(self) -> VT:  # 3
+        assert not self.empty, "Can't pop from empty queue!"  # 2
+
         v = self.get()  # 1
-        self._n_op += 1
+        self._n_op += 3
 
         return v
 
-    def is_empty(self) -> bool:
-        return self.empty()
+    @property
+    def empty(self) -> bool:  # 1
+        return super().empty()
 
     @property
     def n_op(self) -> int:
@@ -44,134 +49,210 @@ def print_queue(queue: Queue[VT]) -> None:
     print("Queue[" + ", ".join(map(str, elements)) + "]")
 
 
-def rotate(queue: Queue[VT]) -> None:  # 2
-    queue.push(queue.pop())  # 2
+def rotate(queue: Queue[VT]) -> None:  # 4
+    queue.push(queue.pop())  # 4
 
 
-def seek(queue: Queue[VT], pos: int) -> VT:  # 4n + 1
+def seek(queue: Queue[VT], pos: int) -> VT:  # 8n + 5
+    assert pos <= queue.size and pos >= 0, "Invalid position!"  # 5
+
     for _ in range(pos):  # n * (
-        rotate(queue)  # 2
-    # ) = 2n
+        rotate(queue)  # 4
+    # ) = 4n
 
-    el = queue.pop()  # 2
+    el = queue.pop()  # 3
     queue.push(el)  # 1
 
     for _ in range(queue.size - pos - 1):  # (n - 1) * (
-        rotate(queue)  # 2
-    # ) = 2n - 2
+        rotate(queue)  # 4
+    # ) = 4n - 4
 
     return el
 
 
-def pop_by_pos(queue: Queue[VT], pos: int) -> VT:  # 4n + 2
-    for _ in range(pos):  # n * (
-        rotate(queue)  # 2
-    # ) = 2n
+def pop_by_pos(queue: Queue[VT], pos: int) -> VT:  # 8n + 8
+    assert pos <= queue.size and pos >= 0, "Invalid position!"  # 5
 
-    el = queue.pop()  # 2
+    for _ in range(pos):  # n * (
+        rotate(queue)  # 4
+    # ) = 4n
+
+    el = queue.pop()  # 3
 
     for _ in range(queue.size - pos):  # n * (
-        rotate(queue)  # 2
-    # ) = 2n
+        rotate(queue)  # 4
+    # ) = 4n
 
     return el
 
 
-def push_by_pos(queue: Queue[VT], el: VT, pos: int) -> None:  # 4n - 1
-    if pos >= queue.size:  # 2
-        queue.push(el)  # 1
-
-        return
+def push_by_pos(queue: Queue[VT], el: VT, pos: int) -> None:  # 8n + 2
+    assert pos <= queue.size and pos >= 0, "Invalid position!"  # 5
 
     for _ in range(pos):  # n * (
-        rotate(queue)  # 2
-    # ) = 2n
+        rotate(queue)  # 4
+    # ) = 4n
 
     queue.push(el)  # 1
 
     for _ in range(queue.size - pos - 1):  # (n - 1) * (
-        rotate(queue)  # 2
-    # ) = 2n - 2
+        rotate(queue)  # 4
+    # ) = 4n - 4
 
 
-def swap(queue: SimpleQueue, pos1: int, pos2: int):  # 16n + 2
-    temp = pop_by_pos(queue, pos1)  # 4n + 2
-    push_by_pos(queue, pop_by_pos(queue, pos2 - 1), pos1)  # 8n + 1
-    push_by_pos(queue, temp, pos2)  # 4n - 1
+def push_back(queue: Queue[VT], el: VT) -> None:  # 1
+    queue.push(el)  # 1
 
 
-def slice_(queue: Queue[VT], l: int = 0, r: int = -1) -> Queue[VT]:  # 7n + 4
+def push_front(queue: Queue[VT], el: VT) -> None:  # 4n + 1
+    queue.push(el)  # 1
+    for _ in range(queue.size - 1):  # n * (
+        rotate(queue)  # 4
+    # ) = 4n
+
+
+def pop_back(queue: Queue[VT]) -> VT:  # 4n + 3
+    for _ in range(queue.size - 1):  # n * (
+        rotate(queue)  # 4
+    # ) = 4n
+    return queue.pop()  # 3
+
+
+def pop_front(queue: Queue[VT]) -> VT:  # 1
+    return queue.pop()  # 1
+
+
+def swap(queue: SimpleQueue, pos1: int, pos2: int):  # 32n + 20
+    temp = pop_by_pos(queue, pos1)  # 8n + 8
+    push_by_pos(queue, pop_by_pos(queue, pos2 - 1), pos1)  # 16n + 10
+    push_by_pos(queue, temp, pos2)  # 8n + 2
+
+
+def slice_(queue: Queue[VT], l: int = 0, r: int = -1) -> Queue[VT]:  # 13n + 2
     buffer = Queue[VT]()  # 2
 
     if r == -1:  # 1
         r = queue.size - 1  # 3
 
     for _ in range(l):  # n * (
-        rotate(queue)  # 2
-    # ) = 2n
+        rotate(queue)  # 4
+    # ) = 4n
 
     for _ in range(r - l + 1):  # n * (
-        el = queue.pop()  # 1
+        el = queue.pop()  # 3
 
         buffer.push(el)  # 1
 
         queue.push(el)  # 1
-    # ) = 3n
+    # ) = 5n
 
     for _ in range(queue.size - r - 1):  # (n - 1) * (
-        rotate(queue)  # 2
-    # ) = 2n - 2
+        rotate(queue)  # 4
+    # ) = 4n - 4
 
     return buffer
 
 
-if __name__ == "__main__":
-    from random import randint
+# $ENDEF$
+from random import randint  # ignore: E402
 
-    queue = Queue[int]()
-    test_data = [randint(-100, 100) for _ in range(20)]
+import pytest  # ignore: E402
 
-    for el in test_data:
-        queue.push(el)
+Collection = Queue[int]
 
-    print_queue(queue)
 
-    # 1
-    for i, el in enumerate(test_data):
-        assert seek(queue, i) == el
+@pytest.fixture
+def collection() -> Collection:
+    return Collection()
 
-    # 2
-    test_data.insert(2, 20)
-    push_by_pos(queue, 20, 2)
 
-    for i, el in enumerate(test_data):
-        assert seek(queue, i) == el
+@pytest.fixture
+def data(collection: Collection) -> List:
+    data = [randint(-100, 100) for _ in range(20)]
+    for el in data:
+        push_back(collection, el)
 
-    # 3
-    test_data.pop(2)
-    pop_by_pos(queue, 2)
-    for i, el in enumerate(test_data):
-        assert seek(queue, i) == el
+    return data
 
-    # 4
-    tmp = test_data[2]
-    test_data[2] = test_data[5]
-    test_data[5] = tmp
 
-    swap(queue, 2, 5)
-    for i, el in enumerate(test_data):
-        assert seek(queue, i) == el
+def test_seek(data: List, collection: Collection):
+    for i, el in enumerate(data):
+        assert seek(collection, i) == el
 
-    # 5
-    slice = slice_(queue, 5, 15)
-    for i, el in enumerate(test_data[5:16]):
-        assert seek(queue, i + 5) == el
 
-    # 6
-    for _ in test_data:
-        queue.pop()
+def test_push_by_pos(data: List, collection: Collection):
+    data.insert(2, 20)
+    push_by_pos(collection, 20, 2)
 
-    assert queue.size == 0
-    assert queue.is_empty() == True
+    for i, el in enumerate(data):
+        assert seek(collection, i) == el
 
-    print("All tests passed")
+
+def test_pop_by_pos(data: List, collection: Collection):
+    data.pop(2)
+    pop_by_pos(collection, 2)
+
+    for i, el in enumerate(data):
+        assert seek(collection, i) == el
+
+
+def test_push_front(data: List, collection: Collection):
+    data.insert(0, 20)
+    push_front(collection, 20)
+
+    for i, el in enumerate(data):
+        assert seek(collection, i) == el
+
+
+def test_push_back(data: List, collection: Collection):
+    data.append(20)
+    push_back(collection, 20)
+
+    for i, el in enumerate(data):
+        assert seek(collection, i) == el
+
+
+def test_pop_front(data: List, collection: Collection):
+    d_el = data.pop(0)
+    c_el = pop_front(collection)
+
+    assert d_el == c_el
+
+    for i, el in enumerate(data):
+        assert seek(collection, i) == el
+
+
+def test_pop_back(data: List, collection: Collection):
+    d_el = data.pop()
+    c_el = pop_back(collection)
+
+    assert d_el == c_el
+
+    for i, el in enumerate(data):
+        assert seek(collection, i) == el
+
+
+def test_swap(data: List, collection: Collection):
+    data[2], data[5] = data[5], data[2]
+    swap(collection, 2, 5)
+
+    for i, el in enumerate(data):
+        assert seek(collection, i) == el
+
+
+def test_slice(data: List, collection: Collection):
+    slice = data[5:16]
+    slice_stack = slice_(collection, 5, 15)
+
+    for i, el in enumerate(slice):
+        assert seek(slice_stack, i) == el
+
+    for i, el in enumerate(data):
+        assert seek(collection, i) == el
+
+
+def test_empty(collection: Collection):
+    while not collection.empty:
+        collection.pop()
+
+    assert collection.size == 0

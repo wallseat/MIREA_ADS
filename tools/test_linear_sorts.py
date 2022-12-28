@@ -101,7 +101,7 @@ def prepare_collections(collections_files: List[Path]) -> List[CollectionDef]:
 
 def main():
     sorts_files = list(SORTS_ABC_DIR.glob("*_sort.py"))
-    collections_files = list(COLLECTIONS_ABC_DIR.glob("stack_*.py"))
+    collections_files = list(COLLECTIONS_ABC_DIR.glob("*.py"))
 
     sorts = prepare_sorts(sorts_files)
     collections = prepare_collections(collections_files)
@@ -119,7 +119,7 @@ def main():
             code += (
                 "\nif __name__ == '__main__':\n"
                 "\tfrom random import randint\n"
-                "\tdata = [randint(-99, 99) for _ in range(25)]\n"
+                "\tdata = [randint(-99, 99) for _ in range(200)]\n"
                 f"\t{collection_var} = {collection_class_name}[int]()\n"
                 "\tfor el in data:\n"
                 f"\t\t{collection_var}.push(el)\n"
@@ -127,7 +127,7 @@ def main():
                 f"\t{sort.sort_func}({collection_var})\n"
                 "\tfor i, el in enumerate(data):\n"
                 f"\t\tassert el == seek({collection_var}, i), f'index: {{i}}, expected {{el}}, got {{seek({collection_var}, i)}}'\n"
-            )
+            ).replace("\t", "    ")
             print(
                 f"Collection: {collection.collection_type_name}, Sort: {sort.sort_type_name}"
             )

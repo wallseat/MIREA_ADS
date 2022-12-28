@@ -44,8 +44,7 @@ class Stack(Generic[VT]):
         self._n_op += 14
 
     def pop(self) -> VT:  # 10
-        if self.empty:  # 2
-            raise Exception("Can't pop from empty stack!")
+        assert not self.empty, "Can't pop from empty stack!"  # 2
 
         node = self._top  # 3
         self._top = node.next  # 3
@@ -60,7 +59,9 @@ class Stack(Generic[VT]):
         return self._size == 0
 
     @property
-    def top(self) -> VT:  # 2
+    def top(self) -> VT:  # 4
+        assert not self.empty, "Can't get top from empty stack!"  # 2
+
         return self._top.value
 
     @property
@@ -87,14 +88,16 @@ def print_stack(stack: Stack[VT]) -> None:
         stack.push(buffer.pop())
 
 
-def seek(stack: Stack[VT], pos: int) -> VT:  #  48n + 4
+def seek(stack: Stack[VT], pos: int) -> VT:  #  48n + 11
+    assert pos <= stack.size and pos >= 0, "Invalid position!"  # 5
+
     buffer = Stack[VT]()  # 2
 
     for _ in range(pos):  # n * (
         buffer.push(stack.pop())  # 24
     # ) = 24n
 
-    el = stack.top  # 2
+    el = stack.top  # 4
 
     for _ in range(pos):  # n * (
         stack.push(buffer.pop())  # 24
@@ -105,7 +108,9 @@ def seek(stack: Stack[VT], pos: int) -> VT:  #  48n + 4
     return el
 
 
-def push_by_pos(stack: Stack[VT], el: VT, pos: int) -> None:  # 48n + 16
+def push_by_pos(stack: Stack[VT], el: VT, pos: int) -> None:  # 48n + 21
+    assert pos <= stack.size and pos >= 0, "Invalid position!"  # 5
+
     buffer = Stack[VT]()  # 2
 
     for _ in range(pos):  # n * (
@@ -121,7 +126,9 @@ def push_by_pos(stack: Stack[VT], el: VT, pos: int) -> None:  # 48n + 16
     stack._n_op += buffer.n_op
 
 
-def pop_by_pos(stack: Stack[VT], pos: int) -> VT:  # 48n + 12
+def pop_by_pos(stack: Stack[VT], pos: int) -> VT:  # 48n + 17
+    assert pos <= stack.size and pos >= 0, "Invalid position!"  # 5
+
     buffer = Stack[VT]()  # 2
 
     for _ in range(pos):  # n * (
@@ -177,13 +184,13 @@ def pop_back(stack: Stack[VT]) -> VT:  # 48n + 12
     return el
 
 
-def swap(stack: Stack[VT], pos1: int, pos2: int) -> None:  # 192n + 56
-    temp = pop_by_pos(stack, pos1)  #  48n + 12
-    push_by_pos(stack, pop_by_pos(stack, pos2 - 1), pos1)  # 96n + 28
-    push_by_pos(stack, temp, pos2)  # 48n + 16
+def swap(stack: Stack[VT], pos1: int, pos2: int) -> None:  # 192n + 76
+    temp = pop_by_pos(stack, pos1)  #  48n + 17
+    push_by_pos(stack, pop_by_pos(stack, pos2 - 1), pos1)  # 96n + 38
+    push_by_pos(stack, temp, pos2)  # 48n + 21
 
 
-def slice_(stack: Stack[VT], l: int = 0, r: int = -1) -> Stack[VT]:  # 56n + 72
+def slice_(stack: Stack[VT], l: int = 0, r: int = -1) -> Stack[VT]:  # 56n + 74
     slice_stack = Stack[VT]()  # 2
     buffer = Stack[VT]()  # 2
 
@@ -195,7 +202,7 @@ def slice_(stack: Stack[VT], l: int = 0, r: int = -1) -> Stack[VT]:  # 56n + 72
     # ) = 24n + 24
 
     for _ in range(r - l + 1):  # (n // 2 + 1) * (
-        slice_stack.push(buffer.top)  # 16
+        slice_stack.push(buffer.top)  # 18
         stack.push(buffer.pop())  # 24
     # ) = 20n + 40
 

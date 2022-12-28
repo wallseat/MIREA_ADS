@@ -1,4 +1,6 @@
-from typing import Generic, Optional, TypeVar, List
+# $Collection: Dequeue$
+# $DEF$
+from typing import Generic, List, Optional, TypeVar
 
 VT = TypeVar("VT")
 
@@ -67,9 +69,8 @@ class Dequeue(Generic[VT]):
 
         self._n_op += 1
 
-    def pop_back(self) -> VT:  # 12
-        if self.empty:
-            raise Exception("Can't pop from empty dequeue!")
+    def pop_back(self) -> VT:  # 14
+        assert not self.empty, "Can't pop from empty dequeue!"  # 2
 
         node = self._tail  # 2
         if self.size == 1:
@@ -87,9 +88,8 @@ class Dequeue(Generic[VT]):
 
         return node.value
 
-    def pop_front(self) -> VT:  # 12
-        if self.empty:
-            raise Exception("Can't pop from empty dequeue!")
+    def pop_front(self) -> VT:  # 14
+        assert not self.empty, "Can't pop from empty dequeue!"  # 2
 
         node = self._head  # 2
 
@@ -108,22 +108,32 @@ class Dequeue(Generic[VT]):
 
         return node.value
 
+    def push(self, value: VT) -> None:  # 11
+        self.push_back(value)
+
+    def pop(self) -> VT:  # 14
+        return self.pop_front()
+
     @property
     def size(self) -> int:  # 1
         return self._size
 
     @property
-    def head(self) -> VT:  # 2
+    def head(self) -> VT:  # 4
+        assert not self.empty, "Can't get head from empty dequeue!"  # 2
+
         return self._head.value
 
     @property
-    def tail(self) -> VT:  # 2
+    def tail(self) -> VT:  # 4
+        assert not self.empty, "Can't get tail from empty dequeue!"  # 2
+
         return self._tail.value
 
     @property
     def n_op(self) -> int:
         return self._n_op
-    
+
     @property
     def empty(self) -> bool:  # 2
         return self._size == 0
@@ -138,51 +148,46 @@ def print_dequeue(dequeue: Dequeue[VT]) -> None:
     print("Dequeue[" + ", ".join(map(str, elements)) + "]")
 
 
-def rotate_left(dequeue: Dequeue[VT]) -> None:  # 23
+def rotate_left(dequeue: Dequeue[VT]) -> None:  # 25
     dequeue.push_back(dequeue.pop_front())
 
 
-def rotate_right(dequeue: Dequeue[VT]) -> None:  # 23
+def rotate_right(dequeue: Dequeue[VT]) -> None:  # 25
     dequeue.push_front(dequeue.pop_back())
 
 
-def seek(dequeue: Dequeue[VT], index: int) -> VT:  # 48n + 12
-    if dequeue.empty:  # 2
-        raise Exception("Can't seek empty dequeue!")
+def seek(dequeue: Dequeue[VT], pos: int) -> VT:  # 26n + 12
+    assert pos <= dequeue.size and pos >= 0, "Invalid position!"  # 5
 
-    if index >= dequeue.size:  # 3
-        raise Exception("Index out of range!")
+    if pos >= dequeue.size // 2:  # 3
+        for _ in range(dequeue.size - pos - 1):  # (n / 2) * (
+            rotate_right(dequeue)  # 25
+        # ) = 13n
 
-    if index >= dequeue.size // 2:  # 3
-        for _ in range(dequeue.size - index - 1):  # (n / 2) * (
-            rotate_right(dequeue)  # 23
-        # ) = 12n
+        node = dequeue.tail  # 4
 
-        node = dequeue.tail  # 2
-
-        for _ in range(dequeue.size - index - 1):  # (n / 2) * (
-            rotate_left(dequeue)  # 23
-        # ) = 12n
+        for _ in range(dequeue.size - pos - 1):  # (n / 2) * (
+            rotate_left(dequeue)  # 25
+        # ) = 13n
 
         return node
 
     else:
-        for _ in range(index):  # (n / 2) * (
-            rotate_left(dequeue)  # 23
-        # ) = 12n
+        for _ in range(pos):  # (n / 2) * (
+            rotate_left(dequeue)  # 25
+        # ) = 13n
 
-        node = dequeue.head  # 2
+        node = dequeue.head  # 4
 
-        for _ in range(index):  # (n / 2) * (
-            rotate_right(dequeue)  # 23
-        # ) = 12n
+        for _ in range(pos):  # (n / 2) * (
+            rotate_right(dequeue)  # 25
+        # ) = 13n
 
         return node
 
 
-def push_by_pos(dequeue: Dequeue[VT], el: VT, pos: int) -> None:  # 24n + 17
-    if pos < 0 or pos > dequeue.size:  # 4
-        raise Exception("Invalid position argument!")
+def push_by_pos(dequeue: Dequeue[VT], el: VT, pos: int) -> None:  # 26n + 19
+    assert pos <= dequeue.size and pos >= 0, "Invalid position!"  # 5
 
     if pos == dequeue.size:  # 2
         dequeue.push_back(el)
@@ -193,14 +198,14 @@ def push_by_pos(dequeue: Dequeue[VT], el: VT, pos: int) -> None:  # 24n + 17
     else:
         if pos < dequeue.size // 2:  # 3
             for _ in range(pos):  # (n // 2) * (
-                rotate_left(dequeue)  # 23
-            # ) = 12n
+                rotate_left(dequeue)  # 25
+            # ) = 13n
 
             dequeue.push_front(el)  # 11
 
             for _ in range(pos):  # (n // 2) * (
-                rotate_right(dequeue)  # 23
-            # ) = 12n
+                rotate_right(dequeue)  # 25
+            # ) = 13n
 
         else:
             for _ in range(dequeue.size - pos):
@@ -208,83 +213,90 @@ def push_by_pos(dequeue: Dequeue[VT], el: VT, pos: int) -> None:  # 24n + 17
 
             dequeue.push_back(el)
 
-            for _ in range(dequeue.size - pos):
+            for _ in range(dequeue.size - pos - 1):
                 rotate_left(dequeue)
 
 
-def pop_by_pos(dequeue: Dequeue[VT], i: int) -> VT:  # 24n + 17
-    if i < 0 or i >= dequeue.size:
-        raise Exception("Invalid position argument!")
+def pop_by_pos(dequeue: Dequeue[VT], pos: int) -> VT:  # 26n + 23
+    assert pos <= dequeue.size and pos >= 0, "Invalid position!"  # 5
 
-    if i == dequeue.size - 1:
-        return dequeue.pop_back()
+    if pos == dequeue.size - 1:  # 3
+        return dequeue.pop_back()  # 14
 
-    elif i == 0:
-        return dequeue.pop_front()
+    elif pos == 0:  # 1
+        return dequeue.pop_front()  # 14
 
     else:
-        if i < dequeue.size // 2:
-            for _ in range(i):
-                rotate_left(dequeue)
+        if pos < dequeue.size // 2:  # 3
+            for _ in range(pos):  # n // 2 * (
+                rotate_left(dequeue)  # 25
+            # ) = 13n
 
-            v = dequeue.pop_front()
+            v = dequeue.pop_front()  # 14
 
-            for _ in range(i):
-                rotate_right(dequeue)
+            for _ in range(pos):  # n // 2 * (
+                rotate_right(dequeue)  # 25
+            # ) = 13n
 
         else:
-            for _ in range(dequeue.size - i - 1):
+            for _ in range(dequeue.size - pos - 1):
                 rotate_right(dequeue)
 
             v = dequeue.pop_back()
 
-            for _ in range(dequeue.size - i - 1):
+            for _ in range(dequeue.size - pos):
                 rotate_left(dequeue)
 
         return v
 
+
 def push_front(dequeue: Dequeue[VT], el: VT) -> None:  # 11
     dequeue.push_front(el)
 
+
 def push_back(dequeue: Dequeue[VT], el: VT) -> None:  # 11
     dequeue.push_back(el)
-    
+
+
 def pop_front(dequeue: Dequeue[VT]) -> VT:  # 12
     return dequeue.pop_front()
+
 
 def pop_back(dequeue: Dequeue[VT]) -> VT:  # 12
     return dequeue.pop_back()
 
-def swap(dequeue: Dequeue, pos1: int, pos2: int) -> None:  # 92n + 10
+
+def swap(dequeue: Dequeue, pos1: int, pos2: int) -> None:  # 52n + 62
     left_el_pos, right_el_pos = min(pos1, pos2), max(pos1, pos2)  # 4
 
-    if left_el_pos < 0 or right_el_pos >= dequeue.size:  # 3
-        raise Exception("Invalid position argument!")
+    assert (
+        left_el_pos >= 0 and right_el_pos <= dequeue.size
+    ), "Invalid position argument!"  # 5
 
     if left_el_pos < dequeue.size // 2:  # 3
-        for _ in range(left_el_pos):  #  n * (
-            rotate_left(dequeue)  # 23
-        # ) = 23n
+        for _ in range(left_el_pos):  #  (n // 2) * (
+            rotate_left(dequeue)  # 25
+        # ) = 13n
 
-        left_el = dequeue.pop_front()  # 12
+        left_el = dequeue.pop_front()  # 14
 
-        for _ in range(right_el_pos - left_el_pos - 1):  # n * (
-            rotate_left(dequeue)  # 23
-        # ) = 23n
+        for _ in range(right_el_pos - left_el_pos - 1):  # (n // 2) * (
+            rotate_left(dequeue)  # 25
+        # ) = 13n
 
-        right_el = dequeue.pop_front()  # 12
+        right_el = dequeue.pop_front()  # 14
 
         dequeue.push_front(left_el)  # 11
 
-        for _ in range(right_el_pos - left_el_pos - 1):  # n * (
-            rotate_right(dequeue)  # 23
-        # ) = 23n
+        for _ in range(right_el_pos - left_el_pos - 1):  # (n // 2) * (
+            rotate_right(dequeue)  # 25
+        # ) = 13n
 
         dequeue.push_front(right_el)  # 11
 
-        for _ in range(left_el_pos):  # n * (
-            rotate_right(dequeue)  # 23
-        # ) = 23n
+        for _ in range(left_el_pos):  # (n // 2) * (
+            rotate_right(dequeue)  # 25
+        # ) = 13n
 
     else:
         for _ in range(dequeue.size - right_el_pos - 1):
@@ -308,27 +320,29 @@ def swap(dequeue: Dequeue, pos1: int, pos2: int) -> None:  # 92n + 10
             rotate_left(dequeue)
 
 
-def slice_(dequeue: Dequeue[VT], l: int = 0, r: int = -1) -> Dequeue[VT]:  # 82n + 6
+def slice_(dequeue: Dequeue[VT], l: int = 0, r: int = -1) -> Dequeue[VT]:  # 88n + 6
     buffer = Dequeue[VT]()  # 2
 
     if r == -1:  # 1
         r = dequeue.size - 1  # 3
 
     for _ in range(l):  # n * (
-        rotate_left(dequeue)  # 23
-    # ) = 23n
+        rotate_left(dequeue)  # 25
+    # ) = 25n
 
     for _ in range(r - l + 1):  # n * (
         buffer.push_back(dequeue.head)  # 13
-        rotate_left(dequeue)  # 23
-    # ) = 36n
+        rotate_left(dequeue)  # 25
+    # ) = 38n
 
     for _ in range(dequeue.size - r - 1):  # n * (
-        rotate_left(dequeue)  # 23
-    # ) = 23n
+        rotate_left(dequeue)  # 25
+    # ) = 25n
 
     return buffer
 
+
+# $ENDEF$
 
 from random import randint  # ignore: E402
 
@@ -360,6 +374,9 @@ def test_push_by_pos(data: List, collection: Collection):
     data.insert(2, 20)
     push_by_pos(collection, 20, 2)
 
+    data.insert(17, 20)
+    push_by_pos(collection, 20, 17)
+
     for i, el in enumerate(data):
         assert seek(collection, i) == el
 
@@ -367,6 +384,9 @@ def test_push_by_pos(data: List, collection: Collection):
 def test_pop_by_pos(data: List, collection: Collection):
     data.pop(2)
     pop_by_pos(collection, 2)
+
+    data.pop(16)
+    pop_by_pos(collection, 16)
 
     for i, el in enumerate(data):
         assert seek(collection, i) == el
