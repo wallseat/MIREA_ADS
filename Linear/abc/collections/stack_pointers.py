@@ -1,5 +1,5 @@
 # $Collection: Stack$
-# $DEF$
+# $DEF
 from typing import Generic, List, Optional, TypeVar
 
 VT = TypeVar("VT")
@@ -213,7 +213,7 @@ def slice_(stack: Stack[VT], l: int = 0, r: int = -1) -> Stack[VT]:  # 56n + 74
     return slice_stack
 
 
-# $ENDEF$
+# $ENDEF
 from random import randint  # ignore: E402
 
 import pytest  # ignore: E402

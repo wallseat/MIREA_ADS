@@ -1,7 +1,7 @@
 from ICollection import VT, Collection, seek, swap
 
 
-# $DEF$
+# $DEF
 def shell_sort(collection: Collection[VT]) -> Collection[VT]:
     last_index = collection.size - 1
     step = collection.size // 2
@@ -20,4 +20,4 @@ def shell_sort(collection: Collection[VT]) -> Collection[VT]:
     return collection
 
 
-# $ENDEF$
+# $ENDEF

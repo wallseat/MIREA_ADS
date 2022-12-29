@@ -1,5 +1,5 @@
 # $Collection: Queue$
-# $DEF$
+# $DEF
 from queue import SimpleQueue
 from typing import List, TypeVar
 
@@ -153,7 +153,7 @@ def slice_(queue: Queue[VT], l: int = 0, r: int = -1) -> Queue[VT]:  # 13n + 2
     return buffer
 
 
-# $ENDEF$
+# $ENDEF
 from random import randint  # ignore: E402
 
 import pytest  # ignore: E402

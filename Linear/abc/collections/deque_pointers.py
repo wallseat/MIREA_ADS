@@ -1,5 +1,5 @@
 # $Collection: Dequeue$
-# $DEF$
+# $DEF
 from typing import Generic, List, Optional, TypeVar
 
 VT = TypeVar("VT")
@@ -342,7 +342,7 @@ def slice_(dequeue: Dequeue[VT], l: int = 0, r: int = -1) -> Dequeue[VT]:  # 88n
     return buffer
 
 
-# $ENDEF$
+# $ENDEF
 
 from random import randint  # ignore: E402
 

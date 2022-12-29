@@ -1,5 +1,5 @@
 # $Collection: Queue$
-# $DEF$
+# $DEF
 from typing import Generic, List, TypeVar
 
 VT = TypeVar("VT")
@@ -182,7 +182,7 @@ def slice_(queue: Queue[VT], l: int = 0, r: int = -1) -> Queue[VT]:  # 99n + 6
     return buff
 
 
-# $ENDEF$
+# $ENDEF
 from random import randint  # ignore: E402
 
 import pytest  # ignore: E402

@@ -1,7 +1,7 @@
 from ICollection import VT, Collection, pop_by_pos, push_by_pos, seek
 
 
-# $DEF$
+# $DEF
 def binary_insertion_sort(collection: Collection[VT]) -> Collection[VT]:
     for i in range(1, collection.size):
         el = pop_by_pos(collection, i)
@@ -17,4 +17,4 @@ def binary_insertion_sort(collection: Collection[VT]) -> Collection[VT]:
     return collection
 
 
-# $ENDEF$
+# $ENDEF

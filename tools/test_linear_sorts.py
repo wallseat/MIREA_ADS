@@ -1,12 +1,23 @@
 import re
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from pathlib import Path
+from pprint import pprint
 from subprocess import PIPE, Popen
 from textwrap import indent
-from typing import List
+from typing import Dict, List, Optional, TypeVar
 
-_SDEF = "$DEF$"
-_EDEF = "$ENDEF$"
+_VT = TypeVar("_VT")
+
+
+def Some(v: Optional[_VT]) -> _VT:
+    assert v is not None
+    return v
+
+
+_SDEF = "$DEF"
+_EDEF = "$ENDEF"
+_CXDEF = "$CXDEF"
+
 _COLLECTION_CLASS = "Collection"
 _COLLECTION_VAR = "collection"
 _COLLECTION_CLASS_MARKER = "$Collection"
@@ -30,6 +41,7 @@ class CollectionDef:
     collection_type_name: str
     collection_class_name: str
     collection_code: str
+    cxdefs: Dict[str, str] = field(default_factory=dict)
 
 
 def prepare_sorts(sorts_files: List[Path]) -> List[SortDef]:
@@ -52,7 +64,9 @@ def prepare_sorts(sorts_files: List[Path]) -> List[SortDef]:
             raise ValueError(f"Invalid sort definition in {sort_file}")
 
         sort_code = "\n".join(sort_file_code[s_line:e_line])
-        sort_func = re.search(r"def (\w+_sort)\(", sort_code).group(1)
+        sort_func = Some(
+            re.search(r"def (\w+_sort)\(", sort_code),
+        ).group(1)
 
         sorts.append(
             SortDef(
@@ -66,33 +80,51 @@ def prepare_sorts(sorts_files: List[Path]) -> List[SortDef]:
 def prepare_collections(collections_files: List[Path]) -> List[CollectionDef]:
 
     collections: List[CollectionDef] = []
+    cxdef_matcher = re.compile(
+        r"(?P<func_def>(def (?P<func_name>.+)\(.+))\$CXDEF: (?P<cxdef>.+)\$"
+    )
 
     for collection_file in collections_files:
         collection_type_name = collection_file.name.split(".")[0]
-        collection_file_code = collection_file.read_text().splitlines()
+        collection_file_code = collection_file.read_text()
 
-        s_line = None
-        e_line = None
+        lines = []
+        start = False
         collection_class = None
-        for i, line in enumerate(collection_file_code):
+        cxdefs: Dict[str, str] = {}
+        for line in collection_file_code.splitlines():
             if _SDEF in line:
-                s_line = i + 1
-            if _EDEF in line:
-                e_line = i
-                break
-            if _COLLECTION_CLASS_MARKER in line:
-                collection_class = re.search(r"\$Collection: (\w+)\$", line).group(1)
+                start = True
 
-        if s_line is None or e_line is None or collection_class is None:
+            elif _EDEF in line:
+                break
+
+            elif _COLLECTION_CLASS_MARKER in line:
+                collection_class = Some(
+                    re.search(r"\$Collection: (\w+)\$", line)
+                ).group(1)
+
+            if _CXDEF in line:
+                func_name = re.sub(cxdef_matcher, r"\g<func_name>", line)
+                cxdef = re.sub(cxdef_matcher, r"\g<cxdef>", line)
+                line = re.sub(cxdef_matcher, r"\g<func_def>\g<cxdef>", line)
+
+                cxdefs[func_name] = cxdef
+
+            if start:
+                lines.append(line)
+
+        if not start or not collection_class:
             raise ValueError(f"Invalid collection definition in {collection_file}")
 
-        collection_code = "\n".join(collection_file_code[s_line:e_line])
+        collection_code = "\n".join(lines)
 
         collections.append(
             CollectionDef(
                 collection_type_name=collection_type_name,
                 collection_class_name=collection_class,
                 collection_code=collection_code,
+                cxdefs=cxdefs,
             )
         )
 
@@ -108,12 +140,18 @@ def main():
 
     for sort in sorts:
         for collection in collections:
+            pprint(collection.cxdefs)
+
             collection_var = collection.collection_class_name.lower()
             collection_class_name = collection.collection_class_name
 
             sort_code = sort.sort_code.replace(
-                _COLLECTION_CLASS, collection_class_name
-            ).replace(_COLLECTION_VAR, collection_var)
+                _COLLECTION_CLASS,
+                collection_class_name,
+            ).replace(
+                _COLLECTION_VAR,
+                collection_var,
+            )
 
             code = collection.collection_code + sort_code
             code += (

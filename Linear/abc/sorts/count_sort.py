@@ -1,15 +1,15 @@
 from ICollection import VT, Collection, push_back, seek
 
 
-# $DEF$
-def counting_sort(collection: Collection[VT]) -> Collection[VT]:
+# $DEF
+def counting_sort(collection: Collection[VT]) -> Collection[VT]:  # $CXGET
     max_ = seek(collection, 0)
     min_ = max_
 
     buffer = Collection[VT]()
 
     while not collection.empty:
-        el = collection.pop()
+        el = collection.pop()  # $CX_VAR: pop$
         if el > max_:
             max_ = el
         if el < min_:
@@ -30,4 +30,4 @@ def counting_sort(collection: Collection[VT]) -> Collection[VT]:
     return collection
 
 
-# $ENDEF$
+# $ENDEF
