@@ -1,10 +1,13 @@
 import re
+import sympy
 from dataclasses import dataclass, field
 from pathlib import Path
 from pprint import pprint
 from subprocess import PIPE, Popen
 from textwrap import indent
-from typing import Dict, List, Optional, TypeVar
+from typing import Dict, List, Optional, TypeVar, Tuple
+from sympy.parsing.sympy_parser import parse_expr
+from sympy.core import Expr, Number
 
 _VT = TypeVar("_VT")
 
@@ -17,6 +20,10 @@ def Some(v: Optional[_VT]) -> _VT:
 _SDEF = "$DEF"
 _EDEF = "$ENDEF"
 _CXDEF = "$CXDEF"
+_CXPUSH = "$CX_PUSH"
+_CXPOP = "$CX_POP"
+_CXPOPBACK = "$CX_POP_BACK"
+_CXEXPR = "$CX_EXPR"
 
 _COLLECTION_CLASS = "Collection"
 _COLLECTION_VAR = "collection"
@@ -36,12 +43,15 @@ class SortDef:
     sort_code: str
 
 
+_T_CXDEFS = Dict[str, Expr | Number]
+
+
 @dataclass
 class CollectionDef:
     collection_type_name: str
     collection_class_name: str
     collection_code: str
-    cxdefs: Dict[str, str] = field(default_factory=dict)
+    cxdefs: _T_CXDEFS = field(default_factory=dict)
 
 
 def prepare_sorts(sorts_files: List[Path]) -> List[SortDef]:
@@ -68,11 +78,7 @@ def prepare_sorts(sorts_files: List[Path]) -> List[SortDef]:
             re.search(r"def (\w+_sort)\(", sort_code),
         ).group(1)
 
-        sorts.append(
-            SortDef(
-                sort_type_name=sort_type_name, sort_func=sort_func, sort_code=sort_code
-            )
-        )
+        sorts.append(SortDef(sort_type_name=sort_type_name, sort_func=sort_func, sort_code=sort_code))
 
     return sorts
 
@@ -80,9 +86,7 @@ def prepare_sorts(sorts_files: List[Path]) -> List[SortDef]:
 def prepare_collections(collections_files: List[Path]) -> List[CollectionDef]:
 
     collections: List[CollectionDef] = []
-    cxdef_matcher = re.compile(
-        r"(?P<func_def>(def (?P<func_name>.+)\(.+))\$CXDEF: (?P<cxdef>.+)\$"
-    )
+    cxdef_matcher = re.compile(r"(?P<func_def>(def (?P<func_name>.+)\(.+))\$CXDEF: (?P<cxdef>.+)\$")
 
     for collection_file in collections_files:
         collection_type_name = collection_file.name.split(".")[0]
@@ -91,7 +95,8 @@ def prepare_collections(collections_files: List[Path]) -> List[CollectionDef]:
         lines = []
         start = False
         collection_class = None
-        cxdefs: Dict[str, str] = {}
+        class_section = False
+        cxdefs: _T_CXDEFS = {}
         for line in collection_file_code.splitlines():
             if _SDEF in line:
                 start = True
@@ -100,16 +105,23 @@ def prepare_collections(collections_files: List[Path]) -> List[CollectionDef]:
                 break
 
             elif _COLLECTION_CLASS_MARKER in line:
-                collection_class = Some(
-                    re.search(r"\$Collection: (\w+)\$", line)
-                ).group(1)
+                collection_class = Some(re.search(r"\$Collection: (\w+)\$", line)).group(1)
 
-            if _CXDEF in line:
-                func_name = re.sub(cxdef_matcher, r"\g<func_name>", line)
-                cxdef = re.sub(cxdef_matcher, r"\g<cxdef>", line)
+            elif "class" in line and collection_class and collection_class in line:
+                class_section = True
+
+            elif class_section and line and not line.startswith(("    ", "\t")):
+                class_section = False
+
+            elif _CXDEF in line:
+                func_name = re.sub(cxdef_matcher, r"\g<func_name>", line).strip()
+                cxdef = re.sub(cxdef_matcher, r"\g<cxdef>", line).strip()
                 line = re.sub(cxdef_matcher, r"\g<func_def>\g<cxdef>", line)
 
-                cxdefs[func_name] = cxdef
+                if class_section:
+                    func_name = f"{_COLLECTION_CLASS}__{func_name}"
+
+                cxdefs[func_name] = parse_expr(cxdef)
 
             if start:
                 lines.append(line)
@@ -131,24 +143,64 @@ def prepare_collections(collections_files: List[Path]) -> List[CollectionDef]:
     return collections
 
 
+def solve_cxdefs(code: str, cxdefs: _T_CXDEFS) -> str:
+    cxexpr_matcher = re.compile(r"(?P<LINE>.+)(?P<CX_EXPR>(\$CX_EXPR: (?P<EXPR>(.+))\$))")
+
+    expr_stack: List[str] = []
+    stack_frames: List[Tuple[int, int]] = []  # (line_no, stack_frame)
+    lines: List[str] = []
+
+    for i, line in enumerate(code.splitlines()):
+        if _CXEXPR in line:
+            str_expr = re.sub(cxexpr_matcher, r"\g<EXPR>", line).strip()
+
+            if not str_expr.endswith(("*", "/", "+", "-", "(", ")", "**")):
+                str_expr = str(parse_expr(str_expr, local_dict=cxdefs))
+
+            expr_stack.append(str_expr)
+
+            line = re.sub(cxexpr_matcher, r"\g<LINE>" + str_expr, line)
+
+        if _CXPUSH in line:
+            stack_frames.append(
+                (i, len(expr_stack)),
+            )
+
+        elif _CXPOP in line:
+            line_no, stack_frame = stack_frames.pop()
+            str_expr = " ".join(str_expr_stack[stack_frame:])
+
+            print(str_expr)
+
+            expr = parse_expr(str_expr, local_dict=cxdefs)
+
+            if _CXPOPBACK in line:
+                line = line.replace(_CXPOPBACK, "")
+                lines[line_no] = lines[line_no].replace(_CXPUSH, str(expr))
+            else:
+                line = line.replace(_CXPOP, str(expr))
+                lines[line_no] = lines[line_no].replace(_CXPUSH, "")
+
+        lines.append(line)
+
+        print("\n".join(lines) + "\n\n")
+
+
 def main():
-    sorts_files = list(SORTS_ABC_DIR.glob("*_sort.py"))
-    collections_files = list(COLLECTIONS_ABC_DIR.glob("*.py"))
+    sorts_files = list(SORTS_ABC_DIR.glob("count_sort.py"))
+    collections_files = list(COLLECTIONS_ABC_DIR.glob("stack_array.py"))
 
     sorts = prepare_sorts(sorts_files)
     collections = prepare_collections(collections_files)
 
     for sort in sorts:
         for collection in collections:
-            pprint(collection.cxdefs)
-
             collection_var = collection.collection_class_name.lower()
             collection_class_name = collection.collection_class_name
 
-            sort_code = sort.sort_code.replace(
-                _COLLECTION_CLASS,
-                collection_class_name,
-            ).replace(
+            solve_cxdefs(sort.sort_code, collection.cxdefs)
+
+            sort_code = sort.sort_code.replace(_COLLECTION_CLASS, collection_class_name,).replace(
                 _COLLECTION_VAR,
                 collection_var,
             )
@@ -166,9 +218,7 @@ def main():
                 "\tfor i, el in enumerate(data):\n"
                 f"\t\tassert el == seek({collection_var}, i), f'index: {{i}}, expected {{el}}, got {{seek({collection_var}, i)}}'\n"
             ).replace("\t", "    ")
-            print(
-                f"Collection: {collection.collection_type_name}, Sort: {sort.sort_type_name}"
-            )
+            print(f"Collection: {collection.collection_type_name}, Sort: {sort.sort_type_name}")
 
             tmp_py = Path("tmp.py")
             tmp_py.write_text(code)

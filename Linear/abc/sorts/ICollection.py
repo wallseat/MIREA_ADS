@@ -1,6 +1,8 @@
 from typing import Generic, TypeVar
+from numbers import Real
 
-VT = TypeVar("VT")
+
+VT = TypeVar("VT", bound=Real)
 
 
 class Collection(Generic[VT]):
