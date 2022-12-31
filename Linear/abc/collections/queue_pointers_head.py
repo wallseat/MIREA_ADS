@@ -31,7 +31,7 @@ class Queue(Generic[VT]):
         self._size = 0
         self._n_op = 0
 
-    def push(self, value: VT) -> None:  # 2n + 21
+    def push(self, value: VT) -> None:  # $CX_DEF: 2*n + 21$
         node = Node(value)  # 2
 
         if self.empty:  # 1
@@ -51,7 +51,7 @@ class Queue(Generic[VT]):
 
         self._n_op += self._size * 2 + 9
 
-    def pop(self) -> VT:  # 8
+    def pop(self) -> VT:  # $CX_DEF: 8$
         assert not self.empty, "Can't pop from empty queue!"  # 2
 
         node = self._head  # 1
@@ -63,7 +63,7 @@ class Queue(Generic[VT]):
         return node.value
 
     @property
-    def empty(self) -> bool:  # 2
+    def empty(self) -> bool:  # $CX_DEF: 2$
         return self._size == 0
 
     @property
@@ -91,11 +91,11 @@ def print_queue(queue: Queue[VT]):
     print("Queue[" + ", ".join(map(str, elements)) + "]")
 
 
-def rotate(queue: Queue[VT]) -> None:  # 2n + 29
+def rotate(queue: Queue[VT]) -> None:  # 2*n + 29
     queue.push(queue.pop())  # 2n + 29
 
 
-def seek(queue: Queue[VT], pos: int) -> VT:  # 4n^2 + 58n + 9
+def seek(queue: Queue[VT], pos: int) -> VT:  # $CX_DEF: 4*n**2 + 58*n + 9$
     assert pos <= queue.size and pos >= 0, "Invalid position!"  # 5
 
     for _ in range(pos):  # n * (
@@ -111,7 +111,7 @@ def seek(queue: Queue[VT], pos: int) -> VT:  # 4n^2 + 58n + 9
     return el
 
 
-def pop_by_pos(queue: Queue[VT], pos: int) -> VT:  # 4n^2 + 58n + 12
+def pop_by_pos(queue: Queue[VT], pos: int) -> VT:  # $CX_DEF: 4*n**2 + 58*n + 12$
     assert pos <= queue.size and pos >= 0, "Invalid position!"  # 5
 
     for _ in range(pos):  # n * (
@@ -127,7 +127,7 @@ def pop_by_pos(queue: Queue[VT], pos: int) -> VT:  # 4n^2 + 58n + 12
     return el
 
 
-def push_by_pos(queue: Queue[VT], el: VT, pos: int) -> None:  # 4n^2 + 34n + 11
+def push_by_pos(queue: Queue[VT], el: VT, pos: int) -> None:  # $CX_DEF: 4*n**2 + 34*n + 11$
     assert pos <= queue.size and pos >= 0, "Invalid position!"  # 5
 
     for _ in range(pos):  # n * (
@@ -141,35 +141,35 @@ def push_by_pos(queue: Queue[VT], el: VT, pos: int) -> None:  # 4n^2 + 34n + 11
     # ) = 2n^2 + 16n
 
 
-def push_back(queue: Queue[VT], el: VT) -> None:  # 2n + 21
+def push_back(queue: Queue[VT], el: VT) -> None:  # $CX_DEF: 2*n + 21$
     queue.push(el)  # 2n + 21
 
 
-def push_front(queue: Queue[VT], el: VT) -> None:  # 2n^2 + 31n + 21
+def push_front(queue: Queue[VT], el: VT) -> None:  # $CX_DEF: 2*n**2 + 31*n + 21$
     queue.push(el)  # 2n + 21
     for _ in range(queue.size - 1):  # n * (
         rotate(queue)  # 2n + 29
     # ) = 2n^2 + 29n
 
 
-def pop_back(queue: Queue[VT]) -> VT:  # 2n^2 + 29n + 8
+def pop_back(queue: Queue[VT]) -> VT:  # $CX_DEF: 2*n**2 + 29*n + 8$
     for _ in range(queue.size - 1):  # n * (
         rotate(queue)  # 2n + 29
     # ) = 2n^2 + 29n
     return queue.pop()  # 8
 
 
-def pop_front(queue: Queue[VT]) -> VT:  # 8
+def pop_front(queue: Queue[VT]) -> VT:  # $CX_DEF: 8$
     return queue.pop()  # 8
 
 
-def swap(queue: Queue, pos1: int, pos2: int):  # 16n^2 + 184n + 46
+def swap(queue: Queue, pos1: int, pos2: int):  # $CX_DEF: 16*n**2 + 184*n + 46$
     temp = pop_by_pos(queue, pos1)  # 4n^2 + 58n + 12
     push_by_pos(queue, pop_by_pos(queue, pos2 - 1), pos1)  # 8n^2 + 92n + 23
     push_by_pos(queue, temp, pos2)  # 4n^2 + 34n + 11
 
 
-def slice_(queue: Queue[VT], l: int = 0, r: int = -1) -> Queue[VT]:  # 8n^2 + 100n + 6
+def slice_(queue: Queue[VT], l: int = 0, r: int = -1) -> Queue[VT]:  # $CX_DEF: 8*n**2 + 100*n + 6$
     buffer = Queue[VT]()  # 2
 
     if r == -1:  # 1

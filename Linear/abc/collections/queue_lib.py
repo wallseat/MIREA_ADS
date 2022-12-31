@@ -14,11 +14,11 @@ class Queue(SimpleQueue):
 
         self._n_op = 0
 
-    def push(self, el: VT) -> None:  # 1
+    def push(self, el: VT) -> None:  # $CX_DEF: 1$
         self.put(el)  # 1
         self._n_op += 1
 
-    def pop(self) -> VT:  # 3
+    def pop(self) -> VT:  # $CX_DEF: 3$
         assert not self.empty, "Can't pop from empty queue!"  # 2
 
         v = self.get()  # 1
@@ -27,7 +27,7 @@ class Queue(SimpleQueue):
         return v
 
     @property
-    def empty(self) -> bool:  # 1
+    def empty(self) -> bool:  # $CX_DEF: 1$
         return super().empty()
 
     @property
@@ -53,7 +53,7 @@ def rotate(queue: Queue[VT]) -> None:  # 4
     queue.push(queue.pop())  # 4
 
 
-def seek(queue: Queue[VT], pos: int) -> VT:  # 8n + 5
+def seek(queue: Queue[VT], pos: int) -> VT:  # $CX_DEF: 8*n + 5$
     assert pos <= queue.size and pos >= 0, "Invalid position!"  # 5
 
     for _ in range(pos):  # n * (
@@ -70,7 +70,7 @@ def seek(queue: Queue[VT], pos: int) -> VT:  # 8n + 5
     return el
 
 
-def pop_by_pos(queue: Queue[VT], pos: int) -> VT:  # 8n + 8
+def pop_by_pos(queue: Queue[VT], pos: int) -> VT:  # $CX_DEF: 8*n + 8$
     assert pos <= queue.size and pos >= 0, "Invalid position!"  # 5
 
     for _ in range(pos):  # n * (
@@ -86,7 +86,7 @@ def pop_by_pos(queue: Queue[VT], pos: int) -> VT:  # 8n + 8
     return el
 
 
-def push_by_pos(queue: Queue[VT], el: VT, pos: int) -> None:  # 8n + 2
+def push_by_pos(queue: Queue[VT], el: VT, pos: int) -> None:  # CX_DEF: 8*n + 2$
     assert pos <= queue.size and pos >= 0, "Invalid position!"  # 5
 
     for _ in range(pos):  # n * (
@@ -100,35 +100,35 @@ def push_by_pos(queue: Queue[VT], el: VT, pos: int) -> None:  # 8n + 2
     # ) = 4n - 4
 
 
-def push_back(queue: Queue[VT], el: VT) -> None:  # 1
+def push_back(queue: Queue[VT], el: VT) -> None:  # $CX_DEF: 1$
     queue.push(el)  # 1
 
 
-def push_front(queue: Queue[VT], el: VT) -> None:  # 4n + 1
+def push_front(queue: Queue[VT], el: VT) -> None:  # $CX_DEF: 4*n + 1$
     queue.push(el)  # 1
     for _ in range(queue.size - 1):  # n * (
         rotate(queue)  # 4
     # ) = 4n
 
 
-def pop_back(queue: Queue[VT]) -> VT:  # 4n + 3
+def pop_back(queue: Queue[VT]) -> VT:  # $CX_DEF: 4*n + 3$
     for _ in range(queue.size - 1):  # n * (
         rotate(queue)  # 4
     # ) = 4n
     return queue.pop()  # 3
 
 
-def pop_front(queue: Queue[VT]) -> VT:  # 1
+def pop_front(queue: Queue[VT]) -> VT:  # $CX_DEF: 1$
     return queue.pop()  # 1
 
 
-def swap(queue: SimpleQueue, pos1: int, pos2: int):  # 32n + 20
+def swap(queue: SimpleQueue, pos1: int, pos2: int):  # $CX_DEF: 32*n + 20$
     temp = pop_by_pos(queue, pos1)  # 8n + 8
     push_by_pos(queue, pop_by_pos(queue, pos2 - 1), pos1)  # 16n + 10
     push_by_pos(queue, temp, pos2)  # 8n + 2
 
 
-def slice_(queue: Queue[VT], l: int = 0, r: int = -1) -> Queue[VT]:  # 13n + 2
+def slice_(queue: Queue[VT], l: int = 0, r: int = -1) -> Queue[VT]:  # $CX_DEF: 13*n + 2$
     buffer = Queue[VT]()  # 2
 
     if r == -1:  # 1

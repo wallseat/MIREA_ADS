@@ -1,6 +1,5 @@
-from typing import Generic, TypeVar
 from numbers import Real
-
+from typing import Generic, TypeVar
 
 VT = TypeVar("VT", bound=Real)
 

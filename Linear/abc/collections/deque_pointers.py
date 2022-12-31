@@ -108,10 +108,10 @@ class Dequeue(Generic[VT]):
 
         return node.value
 
-    def push(self, value: VT) -> None:  # 11
+    def push(self, value: VT) -> None:  # $CX_DEF: 11$
         self.push_back(value)
 
-    def pop(self) -> VT:  # 14
+    def pop(self) -> VT:  # $CX_DEF: 14$
         return self.pop_front()
 
     @property
@@ -135,7 +135,7 @@ class Dequeue(Generic[VT]):
         return self._n_op
 
     @property
-    def empty(self) -> bool:  # 2
+    def empty(self) -> bool:  # $CX_DEF: 2$
         return self._size == 0
 
 
@@ -156,7 +156,7 @@ def rotate_right(dequeue: Dequeue[VT]) -> None:  # 25
     dequeue.push_front(dequeue.pop_back())
 
 
-def seek(dequeue: Dequeue[VT], pos: int) -> VT:  # 26n + 12
+def seek(dequeue: Dequeue[VT], pos: int) -> VT:  # $CX_DEF: 26*n + 12$
     assert pos <= dequeue.size and pos >= 0, "Invalid position!"  # 5
 
     if pos >= dequeue.size // 2:  # 3
@@ -186,7 +186,7 @@ def seek(dequeue: Dequeue[VT], pos: int) -> VT:  # 26n + 12
         return node
 
 
-def push_by_pos(dequeue: Dequeue[VT], el: VT, pos: int) -> None:  # 26n + 19
+def push_by_pos(dequeue: Dequeue[VT], el: VT, pos: int) -> None:  # $CX_DEF: 26*n + 19$
     assert pos <= dequeue.size and pos >= 0, "Invalid position!"  # 5
 
     if pos == dequeue.size:  # 2
@@ -217,7 +217,7 @@ def push_by_pos(dequeue: Dequeue[VT], el: VT, pos: int) -> None:  # 26n + 19
                 rotate_left(dequeue)
 
 
-def pop_by_pos(dequeue: Dequeue[VT], pos: int) -> VT:  # 26n + 23
+def pop_by_pos(dequeue: Dequeue[VT], pos: int) -> VT:  # $CX_DEF: 26*n + 23$
     assert pos <= dequeue.size and pos >= 0, "Invalid position!"  # 5
 
     if pos == dequeue.size - 1:  # 3
@@ -250,28 +250,26 @@ def pop_by_pos(dequeue: Dequeue[VT], pos: int) -> VT:  # 26n + 23
         return v
 
 
-def push_front(dequeue: Dequeue[VT], el: VT) -> None:  # 11
+def push_front(dequeue: Dequeue[VT], el: VT) -> None:  # $CX_DEF: 11$
     dequeue.push_front(el)
 
 
-def push_back(dequeue: Dequeue[VT], el: VT) -> None:  # 11
+def push_back(dequeue: Dequeue[VT], el: VT) -> None:  # $CX_DEF: 11$
     dequeue.push_back(el)
 
 
-def pop_front(dequeue: Dequeue[VT]) -> VT:  # 12
+def pop_front(dequeue: Dequeue[VT]) -> VT:  # $CX_DEF: 12$
     return dequeue.pop_front()
 
 
-def pop_back(dequeue: Dequeue[VT]) -> VT:  # 12
+def pop_back(dequeue: Dequeue[VT]) -> VT:  # $CX_DEF: 12$
     return dequeue.pop_back()
 
 
-def swap(dequeue: Dequeue, pos1: int, pos2: int) -> None:  # 52n + 62
+def swap(dequeue: Dequeue, pos1: int, pos2: int) -> None:  # $CX_DEF: 52*n + 62$
     left_el_pos, right_el_pos = min(pos1, pos2), max(pos1, pos2)  # 4
 
-    assert (
-        left_el_pos >= 0 and right_el_pos <= dequeue.size
-    ), "Invalid position argument!"  # 5
+    assert left_el_pos >= 0 and right_el_pos <= dequeue.size, "Invalid position argument!"  # 5
 
     if left_el_pos < dequeue.size // 2:  # 3
         for _ in range(left_el_pos):  #  (n // 2) * (
@@ -320,7 +318,7 @@ def swap(dequeue: Dequeue, pos1: int, pos2: int) -> None:  # 52n + 62
             rotate_left(dequeue)
 
 
-def slice_(dequeue: Dequeue[VT], l: int = 0, r: int = -1) -> Dequeue[VT]:  # 88n + 6
+def slice_(dequeue: Dequeue[VT], l: int = 0, r: int = -1) -> Dequeue[VT]:  # $CX_DEF: 88*n + 6$
     buffer = Dequeue[VT]()  # 2
 
     if r == -1:  # 1

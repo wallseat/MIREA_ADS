@@ -1,7 +1,6 @@
 # $Collection: Stack$
 # $DEF
 from typing import Generic, List, TypeVar
-from numbers import Real
 
 VT = TypeVar("VT")
 
@@ -19,7 +18,7 @@ class Stack(Generic[VT]):
         self._n_op = 0
         self._size = 0
 
-    def push(self, el: VT) -> None:  # $CXDEF: 13$
+    def push(self, el: VT) -> None:  # $CX_DEF: 13$
         if self._size == self._array_size:  # 3
             self._stack += [0] * self._array_size  # type: ignore # 3
             self._array_size *= 2  # 2
@@ -31,7 +30,7 @@ class Stack(Generic[VT]):
 
         self._n_op += 8
 
-    def pop(self) -> VT:  # $CXDEF: 9$
+    def pop(self) -> VT:  # $CX_DEF: 9$
         assert not self.empty, "Can't pop from empty stack!"  # 2
 
         el = self._stack[self._size - 1]  #  5
@@ -42,7 +41,7 @@ class Stack(Generic[VT]):
         return el
 
     @property
-    def empty(self) -> bool:  # $CXDEF: 2$
+    def empty(self) -> bool:  # $CX_DEF: 2$
         return self._size == 0
 
     @property
@@ -75,7 +74,7 @@ def print_stack(stack: Stack) -> None:
         stack.push(buffer.pop())
 
 
-def seek(stack: Stack[VT], pos: int) -> VT:  # $CXDEF: 44*n + 11$
+def seek(stack: Stack[VT], pos: int) -> VT:  # $CX_DEF: 44*n + 11$
     assert pos <= stack.size and pos >= 0, "Invalid position!"  # 5
 
     buffer = Stack[VT]()  # 2
@@ -95,7 +94,7 @@ def seek(stack: Stack[VT], pos: int) -> VT:  # $CXDEF: 44*n + 11$
     return el
 
 
-def push_by_pos(stack: Stack[VT], el: VT, pos: int) -> None:  # $CXDEF: 44*n + 20$
+def push_by_pos(stack: Stack[VT], el: VT, pos: int) -> None:  # $CX_DEF: 44*n + 20$
     assert pos <= stack.size and pos >= 0, "Invalid position!"  # 5
 
     buffer = Stack[VT]()  # 2
@@ -113,7 +112,7 @@ def push_by_pos(stack: Stack[VT], el: VT, pos: int) -> None:  # $CXDEF: 44*n + 2
     stack._n_op += buffer.n_op
 
 
-def pop_by_pos(stack: Stack[VT], pos: int) -> VT:  # $CXDEF: 44*n + 16$
+def pop_by_pos(stack: Stack[VT], pos: int) -> VT:  # $CX_DEF: 44*n + 16$
     assert pos <= stack.size and pos >= 0, "Invalid position!"  # 5
 
     buffer = Stack[VT]()  # 2
@@ -133,11 +132,11 @@ def pop_by_pos(stack: Stack[VT], pos: int) -> VT:  # $CXDEF: 44*n + 16$
     return el
 
 
-def push_front(stack: Stack[VT], el: VT) -> None:  # $CXDEF: 13$
+def push_front(stack: Stack[VT], el: VT) -> None:  # $CX_DEF: 13$
     stack.push(el)  # 13
 
 
-def push_back(stack: Stack[VT], el: VT) -> None:  # $CXDEF: 46*n + 13$
+def push_back(stack: Stack[VT], el: VT) -> None:  # $CX_DEF: 46*n + 13$
     buffer = Stack[VT]()  # 2
 
     while not stack.empty:  # n * (
@@ -151,11 +150,11 @@ def push_back(stack: Stack[VT], el: VT) -> None:  # $CXDEF: 46*n + 13$
     # ) = 22n
 
 
-def pop_front(stack: Stack[VT]) -> VT:  # $CXDEF: 9$
+def pop_front(stack: Stack[VT]) -> VT:  # $CX_DEF: 9$
     return stack.pop()  # 9
 
 
-def pop_back(stack: Stack[VT]) -> VT:  # $CXDEF: 44*n + 11$
+def pop_back(stack: Stack[VT]) -> VT:  # $CX_DEF: 44*n + 11$
     buffer = Stack[VT]()  # 2
 
     while not stack.empty:  # n * (
@@ -171,13 +170,13 @@ def pop_back(stack: Stack[VT]) -> VT:  # $CXDEF: 44*n + 11$
     return el
 
 
-def swap(stack: Stack, pos1: int, pos2: int) -> None:  # $CXDEF: 176*n + 72$
+def swap(stack: Stack, pos1: int, pos2: int) -> None:  # $CX_DEF: 176*n + 72$
     temp = pop_by_pos(stack, pos1)  #  44n + 16
     push_by_pos(stack, pop_by_pos(stack, pos2 - 1), pos1)  # 88n + 36
     push_by_pos(stack, temp, pos2)  # 44n + 20
 
 
-def slice_(stack: Stack[VT], l: int = 0, r: int = -1) -> Stack[VT]:  # $CXDEF: 51*n + 69$
+def slice_(stack: Stack[VT], l: int = 0, r: int = -1) -> Stack[VT]:  # $CX_DEF: 51*n + 69$
     slice_stack = Stack[VT]()  # 2
     buffer = Stack[VT]()  # 2
 

@@ -1,5 +1,3 @@
-# $Collection: Queue$
-# $DEF
 from typing import Generic, List, TypeVar
 
 VT = TypeVar("VT")
@@ -21,7 +19,7 @@ class Queue(Generic[VT]):
         self._n_op = 0
         self._bias = 0
 
-    def push(self, value: VT) -> None:  # $CX_DEF: 13$
+    def push(self, value: VT) -> None:  # 13
         if self._size == self._array_size:  # 3
             self._queue += [0] * self._array_size  # 3
             self._array_size *= 2  # 2
@@ -31,7 +29,7 @@ class Queue(Generic[VT]):
 
         self._n_op += 13
 
-    def pop(self) -> VT:  # $CX_DEF: 14$
+    def pop(self) -> VT:  # 14
         assert not self.empty, "Can't pop from empty queue!"  # 2
 
         el = self._queue[self._bias]  # 4
@@ -43,7 +41,7 @@ class Queue(Generic[VT]):
         return el
 
     @property
-    def empty(self) -> bool:  # $CX_DEF: 2$
+    def empty(self) -> bool:  # 2
         return self._size == 0
 
     @property
@@ -85,7 +83,7 @@ def rotate(queue: Queue[VT]) -> None:  # 27
     queue.push(queue.pop())  # 27
 
 
-def seek(queue: Queue[VT], pos: int) -> VT:  # $CX_DEF: 54*n + 32$
+def seek(queue: Queue[VT], pos: int) -> VT:  # 54*n + 32
     assert pos <= queue.size and pos >= 0, "Invalid position!"  # 5
 
     for _ in range(pos):  # n * (
@@ -102,7 +100,7 @@ def seek(queue: Queue[VT], pos: int) -> VT:  # $CX_DEF: 54*n + 32$
     return el
 
 
-def pop_by_pos(queue: Queue[VT], pos: int) -> VT:  # $CX_DEF: 54*n + 19$
+def pop_by_pos(queue: Queue[VT], pos: int) -> VT:  # 54*n + 19
     assert pos <= queue.size and pos >= 0, "Invalid position!"  # 5
 
     for _ in range(pos):  # n * (
@@ -118,7 +116,7 @@ def pop_by_pos(queue: Queue[VT], pos: int) -> VT:  # $CX_DEF: 54*n + 19$
     return el
 
 
-def push_by_pos(queue: Queue[VT], el: VT, pos: int) -> None:  # $CX_DEF: 54*n + 18$
+def push_by_pos(queue: Queue[VT], el: VT, pos: int) -> None:  # 54*n + 18
     assert pos <= queue.size and pos >= 0, "Invalid position!"  # 5
 
     for _ in range(pos):  # n * (
@@ -132,35 +130,35 @@ def push_by_pos(queue: Queue[VT], el: VT, pos: int) -> None:  # $CX_DEF: 54*n + 
     # ) = 27n
 
 
-def push_back(queue: Queue[VT], el: VT) -> None:  # $CX_DEF: 13$
+def push_back(queue: Queue[VT], el: VT) -> None:  # 13
     queue.push(el)  # 13
 
 
-def push_front(queue: Queue[VT], el: VT) -> None:  # $CX_DEF: 27*n + 13$
+def push_front(queue: Queue[VT], el: VT) -> None:  # 27*n + 13
     queue.push(el)  # 13
     for _ in range(queue.size - 1):  # n * (
         rotate(queue)  # 27
     # ) = 27n
 
 
-def pop_back(queue: Queue[VT]) -> VT:  # $CX_DEF: 27*n + 14$
+def pop_back(queue: Queue[VT]) -> VT:  # 27*n + 14
     for _ in range(queue.size - 1):  # n * (
         rotate(queue)  # 27
     # ) = 27n
     return queue.pop()  # 14
 
 
-def pop_front(queue: Queue[VT]) -> VT:  # $CX_DEF: 14$
+def pop_front(queue: Queue[VT]) -> VT:  # 14
     return queue.pop()  # 14
 
 
-def swap(queue: Queue[VT], pos1: int, pos2: int) -> None:  #  $CX_DEF: 216*n + 74$
+def swap(queue: Queue[VT], pos1: int, pos2: int) -> None:  #  216*n + 74
     temp = pop_by_pos(queue, pos1)  # 54n + 19
     push_by_pos(queue, pop_by_pos(queue, pos2 - 1), pos1)  # 108n + 37
     push_by_pos(queue, temp, pos2)  # 54n + 18
 
 
-def slice_(queue: Queue[VT], l: int = 0, r: int = -1) -> Queue[VT]:  # $CX_DEF: 99*n + 6$
+def slice_(queue: Queue[VT], l: int = 0, r: int = -1) -> Queue[VT]:  # 99*n + 6
     buff = Queue[VT]()  # 2
 
     if r == -1:  # 1
@@ -182,106 +180,56 @@ def slice_(queue: Queue[VT], l: int = 0, r: int = -1) -> Queue[VT]:  # $CX_DEF: 
     return buff
 
 
-# $ENDEF
-from random import randint  # ignore: E402
+def selection_sort(queue: Queue[VT]) -> Queue[VT]:  # 54*n**3 + 306*n**2 + 108*n
+    for start_pos in range(queue.size):  # n * (
+        min_el_pos = start_pos  # 1
+        min_el = seek(queue, min_el_pos)  # 54*n + 33
 
-import pytest  # ignore: E402
+        for check_el_pos in range(start_pos + 1, queue.size):  # n * (
+            check_el = seek(queue, check_el_pos)  # 54*n + 33
+            if check_el < min_el:  # 1
+                min_el = check_el  # 1
+                min_el_pos = check_el_pos  # 1
+        # ) = 54*n**2 + 36*n
 
-Collection = Queue[int]
-
-
-@pytest.fixture
-def collection() -> Collection:
-    return Collection()
-
-
-@pytest.fixture
-def data(collection: Collection) -> List:
-    data = [randint(-100, 100) for _ in range(20)]
-    for el in data:
-        push_back(collection, el)
-
-    return data
+        if min_el_pos != start_pos:  # 1
+            swap(queue, start_pos, min_el_pos)  # 216*n + 74
+    # ) = 54*n**3 + 306*n**2 + 108*n
 
 
-def test_seek(data: List, collection: Collection):
-    for i, el in enumerate(data):
-        assert seek(collection, i) == el
+if __name__ == "__main__":
+    import sys
+    import time
+    from random import randint
 
+    if len(sys.argv) < 2 or sys.argv[1] not in ["example", "tests"]:
+        print(f"Usage: python3 {sys.argv[0]} [example/tests]")
+        exit(1)
 
-def test_push_by_pos(data: List, collection: Collection):
-    data.insert(2, 20)
-    push_by_pos(collection, 20, 2)
+    if sys.argv[1] == "example":
+        struct = Queue[int]()
+        for _ in range(20):
+            struct.push(randint(-10000, 10000))
 
-    for i, el in enumerate(data):
-        assert seek(collection, i) == el
+        selection_sort(struct)
+        print_queue(struct)
 
+    elif sys.argv[1] == "tests":
+        tests = 10
+        step = 100
 
-def test_pop_by_pos(data: List, collection: Collection):
-    data.pop(2)
-    pop_by_pos(collection, 2)
+        for test_num in range(1, tests + 1):
+            struct = Queue[int]()
 
-    for i, el in enumerate(data):
-        assert seek(collection, i) == el
+            for _ in range(test_num * step):
+                struct.push(randint(-10000, 10000))
 
+            start_time = time.time()
+            selection_sort(struct)
+            total_time = time.time() - start_time
 
-def test_push_front(data: List, collection: Collection):
-    data.insert(0, 20)
-    push_front(collection, 20)
-
-    for i, el in enumerate(data):
-        assert seek(collection, i) == el
-
-
-def test_push_back(data: List, collection: Collection):
-    data.append(20)
-    push_back(collection, 20)
-
-    for i, el in enumerate(data):
-        assert seek(collection, i) == el
-
-
-def test_pop_front(data: List, collection: Collection):
-    d_el = data.pop(0)
-    c_el = pop_front(collection)
-
-    assert d_el == c_el
-
-    for i, el in enumerate(data):
-        assert seek(collection, i) == el
-
-
-def test_pop_back(data: List, collection: Collection):
-    d_el = data.pop()
-    c_el = pop_back(collection)
-
-    assert d_el == c_el
-
-    for i, el in enumerate(data):
-        assert seek(collection, i) == el
-
-
-def test_swap(data: List, collection: Collection):
-    data[2], data[5] = data[5], data[2]
-    swap(collection, 2, 5)
-
-    for i, el in enumerate(data):
-        assert seek(collection, i) == el
-
-
-def test_slice(data: List, collection: Collection):
-    slice = data[5:16]
-    slice_stack = slice_(collection, 5, 15)
-
-    for i, el in enumerate(slice):
-        assert seek(slice_stack, i) == el
-
-    for i, el in enumerate(data):
-        assert seek(collection, i) == el
-
-
-def test_empty(collection: Collection):
-    while not collection.empty:
-        collection.pop()
-
-    assert collection.size == 0
+            print(f"Test: {test_num}")
+            print(f"Elements count: {test_num * step}")
+            print(f"Total time: {total_time}".replace(".", ","))
+            print(f"N_OP: {struct.n_op}")
+            print("-------------")

@@ -1,3 +1,15 @@
+from ICollection import VT, Collection
+
+
+def print_collection(collection: Collection[VT]) -> None:
+    ...
+
+
+def some_sort(collection: Collection[VT]) -> Collection[VT]:
+    ...
+
+
+# $DEF
 if __name__ == "__main__":
     import sys
     import time
@@ -8,19 +20,19 @@ if __name__ == "__main__":
         exit(1)
 
     if sys.argv[1] == "example":
-        struct = SOME_LINEAR_STRUCTURE[int]()
+        struct = Collection[int]()
         for _ in range(20):
             struct.push(randint(-10000, 10000))
 
         some_sort(struct)
-        print_struct(struct)
+        print_collection(struct)
 
     elif sys.argv[1] == "tests":
         tests = 10
         step = 1000
 
         for test_num in range(1, tests + 1):
-            struct = SOME_LINEAR_STRUCTURE[int]()
+            struct = Collection[int]()
 
             for _ in range(test_num * step):
                 struct.push(randint(-10000, 10000))
@@ -34,3 +46,4 @@ if __name__ == "__main__":
             print(f"Total time: {total_time}".replace(".", ","))
             print(f"N_OP: {struct.n_op}")
             print("-------------")
+# $ENDEF
