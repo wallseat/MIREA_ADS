@@ -116,9 +116,7 @@ class Graph:
 
         _data: Optional[List[List[int]]] = graph_json.get("data", None)
         if _data is None:
-            raise Exception(
-                "Не заданны данные для построения графа! Смотри документацию!"
-            )
+            raise Exception("Не заданны данные для построения графа! Смотри документацию!")
 
         _labels: Optional[Dict[str, str]] = graph_json.get("labels", None)
 
@@ -229,9 +227,7 @@ class Graph:
             raise Exception(f"Ребра с таким набором вершин не существует! ({v1}, {v2})")
 
     def to_adj_matrix(self) -> List[List[int]]:
-        adj_matrix = [
-            [0 for _ in range(len(self._vertices))] for _ in range(len(self._vertices))
-        ]
+        adj_matrix = [[0 for _ in range(len(self._vertices))] for _ in range(len(self._vertices))]
         for edge in self._edges:
             adj_matrix[edge._vertices[0]][edge._vertices[1]] = edge.len
 
@@ -257,11 +253,7 @@ def find_minimal_equivalent(adj_matrix: List[List[int]]) -> List[List[int]]:
     for k in range(dim):
         for i in range(dim):
             for j in range(dim):
-                if (
-                    adj_matrix[i][j] != 0
-                    and adj_matrix[i][k] != 0
-                    and adj_matrix[k][j] != 0
-                ):
+                if adj_matrix[i][j] != 0 and adj_matrix[i][k] != 0 and adj_matrix[k][j] != 0:
                     adj_matrix[i][j] = 0
     return adj_matrix
 
@@ -271,10 +263,7 @@ if __name__ == "__main__":
     graph.load("graph_task12.json")
 
     adj_matrix = graph.to_adj_matrix()
-    print(
-        "Матрица смежности:\n"
-        + "\n".join([" ".join([str(j) for j in i]) for i in adj_matrix])
-    )
+    print("Матрица смежности:\n" + "\n".join([" ".join([str(j) for j in i]) for i in adj_matrix]))
     adj_matrix = find_minimal_equivalent(graph.to_adj_matrix())
     print(
         "Матрица смежности минимального эквивалентного графа:\n"

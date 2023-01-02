@@ -19,7 +19,7 @@ class TREE__:
 
 
 if __name__ == "__main__":
-    # $А = A ⋂ B$#
+    # $А = A ⋂ B$
     from random import randint
 
     tree_a = TREE__[int]()
@@ -39,7 +39,4 @@ if __name__ == "__main__":
         if not tree_b.find(node.value):
             tree_a.remove(node.value)
 
-    print(
-        "Дерево А после удаления элементов отсутствующих в дереве В:\n"
-        + str(tree_a.traverse_inorder())
-    )
+    print("Дерево А после удаления элементов отсутствующих в дереве В:\n" + str(tree_a.traverse_inorder()))

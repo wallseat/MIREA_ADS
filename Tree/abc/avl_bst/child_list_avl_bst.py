@@ -42,9 +42,7 @@ class AVL_BST(Generic[VT]):
         return self._find(self._root, value)
 
     def _fix_height(self, root: Node[VT]):
-        root.height = 1 + max(
-            self._height(root.left_right[0]), self._height(root.left_right[1])
-        )
+        root.height = 1 + max(self._height(root.left_right[0]), self._height(root.left_right[1]))
 
     def _insert(self, root: Node[VT], value: VT) -> Node[VT]:
         if not root:

@@ -19,7 +19,7 @@ class TREE__:
 
 
 if __name__ == "__main__":
-    # $А=A ⋃пр B$#
+    # $А=A ⋃пр B$
     from random import randint
 
     tree_a = TREE__[int]()
@@ -39,7 +39,4 @@ if __name__ == "__main__":
     for node in tree_b.traverse_preorder():
         tree_a.insert(node.value)
 
-    print(
-        "Дерево А после добавления элементов дерева В в прямом порядке:\n"
-        + str(tree_a.traverse_inorder())
-    )
+    print("Дерево А после добавления элементов дерева В в прямом порядке:\n" + str(tree_a.traverse_inorder()))

@@ -14,11 +14,7 @@ def DFS(matrix):
         path_stack.append(v1)
         for v2, e in enumerate(matrix[v1]):
             if e:
-                if (
-                    v2 in path_stack
-                    and v2 == path_stack[0]
-                    and len(path_stack) == len(matrix)
-                ):
+                if v2 in path_stack and v2 == path_stack[0] and len(path_stack) == len(matrix):
                     path_stack.append(v2)
                     return True
                 elif v2 not in path_stack:

@@ -116,9 +116,7 @@ class Graph:
 
         _data: Optional[List[List[int]]] = graph_json.get("data", None)
         if _data is None:
-            raise Exception(
-                "Не заданны данные для построения графа! Смотри документацию!"
-            )
+            raise Exception("Не заданны данные для построения графа! Смотри документацию!")
 
         _labels: Optional[Dict[str, str]] = graph_json.get("labels", None)
 
@@ -229,9 +227,7 @@ class Graph:
             raise Exception(f"Ребра с таким набором вершин не существует! ({v1}, {v2})")
 
     def to_adj_matrix(self) -> List[List[int]]:
-        adj_matrix = [
-            [0 for _ in range(len(self._vertices))] for _ in range(len(self._vertices))
-        ]
+        adj_matrix = [[0 for _ in range(len(self._vertices))] for _ in range(len(self._vertices))]
         for edge in self._edges:
             adj_matrix[edge._vertices[0]][edge._vertices[1]] = edge.len
 
@@ -304,10 +300,7 @@ if __name__ == "__main__":
         case "example":
             print("Ребра графа:\n" + "\n".join(str(e) for e in graph.edges))
             print("Вершины графа:\n" + "\n".join(str(v) for v in graph.vertices))
-            print(
-                "Матрица смежности:\n"
-                + "\n".join(str(row) for row in graph.to_adj_matrix())
-            )
+            print("Матрица смежности:\n" + "\n".join(str(row) for row in graph.to_adj_matrix()))
         case "task":
             cycle_len = input("Введите длину цикла: ")
 

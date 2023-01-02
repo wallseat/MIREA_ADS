@@ -1,37 +1,26 @@
-VT = type
+from Linear.abc.ICollection import VT, Collection, seek, swap
 
 
-class Collection:
-    def pop():
-        ...
+# $DEF
+def shell_sort(collection: Collection[VT]) -> Collection[VT]:  # $CX_PUSH: 1$
+    last_index = collection.size - 1  # $CX_EXPR: 3$
+    step = collection.size // 2  # $CX_EXPR: 3$
+    while step > 0:  # $CX_PUSH: log(n)$
+        for i in range(step, last_index + 1, 1):  # $CX_PUSH: n$
+            j = i  # $CX_EXPR: 1$
+            delta = j - step  # $CX_EXPR: 2$
+            while delta >= 0 and seek(collection, delta) > seek(collection, j):  # $CX_PUSH: 1$
+                # $CX_EXPR: seek + seek$
+                swap(collection, delta, j)  # $CX_EXPR: swap$
+                j = delta  # $CX_EXPR: 1$
+                delta = j - step  # $CX_EXPR: 2$
+            # ) = $CX_POP
+        # ) = $CX_POP
+        step //= 2  # $CX_EXPR: 2$
+    # ) = $CX_POP
 
-    def push():
-        ...
-
-    @property
-    def size():
-        ...
+    return collection
+    # $CX_POP_BACK
 
 
-def swap():
-    pass
-
-
-def seek():
-    pass
-
-
-def shell_sort(collection: Collection[VT]) -> Collection[VT]:
-    last_index = collection.size - 1
-    step = collection.size // 2
-    while step > 0:  # log(n) * (
-        for i in range(step, last_index + 1, 1):  # n * (
-            j = i  # 1
-            delta = j - step  # 2
-            while delta >= 0 and seek(collection, delta) > seek(collection, j):
-                swap(collection, delta, j)
-                j = delta  # 1
-                delta = j - step  # 2
-            # ) =
-        step //= 2
-    # ) =
+# $ENDEF
