@@ -57,9 +57,10 @@ def upload_to_yd(disk: yadisk.YaDisk, task_type: TaskType, task_no_s: int, task_
             zip_path = None
             task_folder_path = None
             lab_name = None
+            rm = True if task_type != TaskType.GRAPH else False
 
             path = task_type.get_base_path() / str(task_no)
-            if path.exists():
+            if path.exists() and rm:
                 shutil.rmtree(path)
 
             if task_type == TaskType.TREE:
@@ -67,6 +68,7 @@ def upload_to_yd(disk: yadisk.YaDisk, task_type: TaskType, task_no_s: int, task_
             elif task_type == TaskType.LINEAR:
                 task_folder_path = create_linear_task(task_no)
             elif task_type == TaskType.GRAPH:
+                rm = False
                 task_folder_path = Path(f"Graph/{task_no}")
                 if not task_folder_path.exists():
                     continue
@@ -89,13 +91,12 @@ def upload_to_yd(disk: yadisk.YaDisk, task_type: TaskType, task_no_s: int, task_
             )
             changed_resources.append(zip_path.name)
         except Exception as e:
-            if lab_name:
-                print(f"Ошибка при загрузке задания {lab_name}_{task_no}: {e}")
+            print(f"Ошибка при загрузке задания {lab_name}_{task_no}: {e}")
 
         else:
             if zip_path:
                 zip_path.unlink()
-            if task_folder_path:
+            if task_folder_path and rm:
                 shutil.rmtree(task_folder_path)
 
 
