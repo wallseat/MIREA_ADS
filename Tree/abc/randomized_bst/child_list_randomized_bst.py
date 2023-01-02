@@ -108,9 +108,7 @@ class RandomizedBST(Generic[VT]):
         elif tree_max is None:
             return tree_min
 
-        elif random.randint(
-            0, self._size(tree_min) + self._size(tree_max)
-        ) < self._size(tree_min):
+        elif random.randint(0, self._size(tree_min) + self._size(tree_max)) < self._size(tree_min):
             tree_min.left_right[1] = self._join(tree_min.left_right[1], tree_max)
             self._fix_size(tree_min)
             return tree_min
@@ -144,9 +142,7 @@ class RandomizedBST(Generic[VT]):
         if root is None:
             return 0
         else:
-            return 1 + max(
-                self._height(root.left_right[0]), self._height(root.left_right[1])
-            )
+            return 1 + max(self._height(root.left_right[0]), self._height(root.left_right[1]))
 
     def height(self):
         return self._height(self._root)

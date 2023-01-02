@@ -49,9 +49,7 @@ class RandomizedBST(Generic[VT]):
         return self._nodes[root].size if root is not None else 0
 
     def _fix_size(self, root: int):
-        self._nodes[root].size = (
-            1 + self._size(self._left[root]) + self._size(self._right[root])
-        )
+        self._nodes[root].size = 1 + self._size(self._left[root]) + self._size(self._right[root])
 
     def _rotate_right(self, d: int) -> Optional[int]:
         b = self._left[d]
@@ -120,9 +118,7 @@ class RandomizedBST(Generic[VT]):
         elif tree_max is None:
             return tree_min
 
-        elif random.randint(
-            0, self._size(tree_min) + self._size(tree_max)
-        ) < self._size(tree_min):
+        elif random.randint(0, self._size(tree_min) + self._size(tree_max)) < self._size(tree_min):
             self._right[tree_min] = self._join(self._right[tree_min], tree_max)
             self._fix_size(tree_min)
             return tree_min
@@ -156,9 +152,7 @@ class RandomizedBST(Generic[VT]):
         if root is None:
             return 0
         else:
-            return 1 + max(
-                self._height(self._left[root]), self._height(self._right[root])
-            )
+            return 1 + max(self._height(self._left[root]), self._height(self._right[root]))
 
     def height(self) -> int:
         return self._height(self._root)

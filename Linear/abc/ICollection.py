@@ -58,5 +58,5 @@ def pop_back(collection: Collection[VT]) -> VT:
     ...
 
 
-def slice_(collection: Collection[VT], l: int, r: int) -> Collection[VT]:
+def partition(collection: Collection[VT], l: int, r: int) -> Collection[VT]:
     ...

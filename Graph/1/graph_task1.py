@@ -37,18 +37,14 @@ class Graph:
     # Добавление вершины с индеком в граф
     def add_vertex_with_index(self, v_name, v_index):
 
-        if (not v_name in self.vertex_names) and (
-            not v_index in self.vertex_names.values()
-        ):
+        if (not v_name in self.vertex_names) and (not v_index in self.vertex_names.values()):
             self.vertex_names[v_name] = v_index
 
             if v_index >= self.length:
 
                 self.length = v_index + 1
 
-                new_matrix = [
-                    [0 for x in range(self.length)] for y in range(self.length)
-                ]
+                new_matrix = [[0 for x in range(self.length)] for y in range(self.length)]
 
                 for i in range(len(self.matrix)):
                     for j in range(len(self.matrix)):
@@ -60,9 +56,7 @@ class Graph:
                 f"{TextColors.FAIL}///ERROR///{TextColors.ENDC} ВЕРШИНА С НАЗВАНИЕМ '{v_name}' УЖЕ ИСПОЛЬЗУЕТСЯ!"
             )
         else:
-            print(
-                f"{TextColors.FAIL}///ERROR///{TextColors.ENDC} ИНДЕКС '{v_index}' УЖЕ ИСПОЛЬЗУЕТСЯ!"
-            )
+            print(f"{TextColors.FAIL}///ERROR///{TextColors.ENDC} ИНДЕКС '{v_index}' УЖЕ ИСПОЛЬЗУЕТСЯ!")
 
     # Добавление вершины в граф (индекс выбирается автоматически)
     def add_vertex(self, v_name):
@@ -99,9 +93,7 @@ class Graph:
                             self.matrix[i][j] = 0
 
         else:
-            print(
-                f"{TextColors.FAIL}///ERROR///{TextColors.ENDC} НЕТ ВЕРШИНЫ С НАЗВАНИЕМ '{v_name}'!"
-            )
+            print(f"{TextColors.FAIL}///ERROR///{TextColors.ENDC} НЕТ ВЕРШИНЫ С НАЗВАНИЕМ '{v_name}'!")
 
     ##обавление ребра в граф
     def add_edge(self, v1_name, v2_name):
@@ -115,13 +107,9 @@ class Graph:
             self.visual_buff.append([v1_name, v2_name])
 
         elif v1_name not in self.vertex_names:
-            print(
-                f"{TextColors.FAIL}///ERROR///{TextColors.ENDC} НЕТ ВЕРШИНЫ С НАЗВАНИЕМ '{v1_name}'!"
-            )
+            print(f"{TextColors.FAIL}///ERROR///{TextColors.ENDC} НЕТ ВЕРШИНЫ С НАЗВАНИЕМ '{v1_name}'!")
         elif v2_name not in self.vertex_names:
-            print(
-                f"{TextColors.FAIL}///ERROR///{TextColors.ENDC} НЕТ ВЕРШИНЫ С НАЗВАНИЕМ '{v2_name}'!"
-            )
+            print(f"{TextColors.FAIL}///ERROR///{TextColors.ENDC} НЕТ ВЕРШИНЫ С НАЗВАНИЕМ '{v2_name}'!")
         else:
             print(
                 f"{TextColors.FAIL}///ERROR///{TextColors.ENDC} НЕТ ВЕРШИН С НАЗВАНИЯМИ '{v1_name}' и '{v2_name}'!"
@@ -139,13 +127,9 @@ class Graph:
             self.visual_buff.remove([v1_name, v2_name])
 
         elif v1_name not in self.vertex_names:
-            print(
-                f"{TextColors.FAIL}///ERROR///{TextColors.ENDC} НЕТ ВЕРШИНЫ С НАЗВАНИЕМ '{v1_name}'!"
-            )
+            print(f"{TextColors.FAIL}///ERROR///{TextColors.ENDC} НЕТ ВЕРШИНЫ С НАЗВАНИЕМ '{v1_name}'!")
         elif v2_name not in self.vertex_names:
-            print(
-                f"{TextColors.FAIL}///ERROR///{TextColors.ENDC} НЕТ ВЕРШИНЫ С НАЗВАНИЕМ '{v2_name}'!"
-            )
+            print(f"{TextColors.FAIL}///ERROR///{TextColors.ENDC} НЕТ ВЕРШИНЫ С НАЗВАНИЕМ '{v2_name}'!")
         else:
             print(
                 f"{TextColors.FAIL}///ERROR///{TextColors.ENDC} НЕТ ВЕРШИН С НАЗВАНИЯМИ '{v1_name}' и '{v2_name}'!"
@@ -167,18 +151,14 @@ class Graph:
 
     # Изменить индекс вершины
     def change_vertex_index(self, v_name, new_v_index):
-        if (v_name in self.vertex_names) and (
-            not new_v_index in self.vertex_names.values()
-        ):
+        if (v_name in self.vertex_names) and (not new_v_index in self.vertex_names.values()):
             old_v_index = self.vertex_names[v_name]
             self.vertex_names[v_name] = new_v_index
 
             if new_v_index >= self.length:
                 self.length = new_v_index + 1
 
-                new_matrix = [
-                    [0 for x in range(self.length)] for y in range(self.length)
-                ]
+                new_matrix = [[0 for x in range(self.length)] for y in range(self.length)]
 
                 for i in range(len(self.matrix)):
                     for j in range(len(self.matrix)):
@@ -197,13 +177,9 @@ class Graph:
                         self.matrix[j][old_v_index] = 0
                         self.matrix[j][new_v_index] = 1
         elif not v_name in self.vertex_names:
-            print(
-                f"{TextColors.FAIL}///ERROR///{TextColors.ENDC} НЕТ ВЕРШИНЫ С НАЗВАНИЕМ '{new_v_index}'!"
-            )
+            print(f"{TextColors.FAIL}///ERROR///{TextColors.ENDC} НЕТ ВЕРШИНЫ С НАЗВАНИЕМ '{new_v_index}'!")
         else:
-            print(
-                f"{TextColors.FAIL}///ERROR///{TextColors.ENDC} ИНДЕКС '{new_v_index}' УЖЕ ИСПОЛЬЗУЕТСЯ!"
-            )
+            print(f"{TextColors.FAIL}///ERROR///{TextColors.ENDC} ИНДЕКС '{new_v_index}' УЖЕ ИСПОЛЬЗУЕТСЯ!")
 
     # Вывести матрицу смежности
     def print_matrix(self):
@@ -329,12 +305,7 @@ class Graph:
     def cleared_cycles(self, cycle_list, cycle, original_lists):
         temp_cycle_list = []
         for elem in cycle_list:
-            cycle += (
-                list(self.vertex_names.keys())[
-                    list(self.vertex_names.values()).index(elem[0])
-                ]
-                + "->"
-            )
+            cycle += list(self.vertex_names.keys())[list(self.vertex_names.values()).index(elem[0])] + "->"
             temp_cycle_list.append(elem[0])
         cycle += list(self.vertex_names.keys())[
             list(self.vertex_names.values()).index(cycle_list[len(cycle_list) - 1][1])
@@ -385,13 +356,9 @@ class Graph:
             self.print_cycles(cycle_length)
 
         elif v1_name not in self.vertex_names:
-            print(
-                f"{TextColors.FAIL}///ERROR///{TextColors.ENDC} НЕТ ВЕРШИНЫ С НАЗВАНИЕМ '{v1_name}'!"
-            )
+            print(f"{TextColors.FAIL}///ERROR///{TextColors.ENDC} НЕТ ВЕРШИНЫ С НАЗВАНИЕМ '{v1_name}'!")
         elif v2_name not in self.vertex_names:
-            print(
-                f"{TextColors.FAIL}///ERROR///{TextColors.ENDC} НЕТ ВЕРШИНЫ С НАЗВАНИЕМ '{v2_name}'!"
-            )
+            print(f"{TextColors.FAIL}///ERROR///{TextColors.ENDC} НЕТ ВЕРШИНЫ С НАЗВАНИЕМ '{v2_name}'!")
         else:
             print(
                 f"{TextColors.FAIL}///ERROR///{TextColors.ENDC} НЕТ ВЕРШИН С НАЗВАНИЯМИ '{v1_name}' и '{v2_name}'!"
@@ -406,9 +373,7 @@ class Graph:
                     self.collect_cycles(v_index, j)
 
             if cycle_length == None:
-                print(
-                    f"\n{TextColors.OKGREEN}///OUTPUT///{TextColors.ENDC} ЦИКЛЫ ИЗ ВЕРШИНЫ '{v_name}:"
-                )
+                print(f"\n{TextColors.OKGREEN}///OUTPUT///{TextColors.ENDC} ЦИКЛЫ ИЗ ВЕРШИНЫ '{v_name}:")
             else:
                 print(
                     f"\n{TextColors.OKGREEN}///OUTPUT///{TextColors.ENDC} ЦИКЛЫ ИЗ ВЕРШИНЫ '{v_name}' ДЛИНОЙ, РАВНОЙ {TextColors.OKBLUE}{cycle_length}{TextColors.ENDC}:"
@@ -416,9 +381,7 @@ class Graph:
             self.print_cycles(cycle_length)
 
         else:
-            print(
-                f"{TextColors.FAIL}///ERROR///{TextColors.ENDC} НЕТ ВЕРШИНЫ С НАЗВАНИЕМ '{v_name}'!"
-            )
+            print(f"{TextColors.FAIL}///ERROR///{TextColors.ENDC} НЕТ ВЕРШИНЫ С НАЗВАНИЕМ '{v_name}'!")
 
 
 graph = Graph()

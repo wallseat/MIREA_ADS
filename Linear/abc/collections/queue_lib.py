@@ -86,7 +86,7 @@ def pop_by_pos(queue: Queue[VT], pos: int) -> VT:  # $CX_DEF: 8*n + 8$
     return el
 
 
-def push_by_pos(queue: Queue[VT], el: VT, pos: int) -> None:  # CX_DEF: 8*n + 2$
+def push_by_pos(queue: Queue[VT], el: VT, pos: int) -> None:  # $CX_DEF: 8*n + 2$
     assert pos <= queue.size and pos >= 0, "Invalid position!"  # 5
 
     for _ in range(pos):  # n * (
@@ -128,7 +128,7 @@ def swap(queue: SimpleQueue, pos1: int, pos2: int):  # $CX_DEF: 32*n + 20$
     push_by_pos(queue, temp, pos2)  # 8n + 2
 
 
-def slice_(queue: Queue[VT], l: int = 0, r: int = -1) -> Queue[VT]:  # $CX_DEF: 13*n + 2$
+def partition(queue: Queue[VT], l: int = 0, r: int = -1) -> Queue[VT]:  # $CX_DEF: 13*n + 2$
     buffer = Queue[VT]()  # 2
 
     if r == -1:  # 1
@@ -242,7 +242,7 @@ def test_swap(data: List, collection: Collection):
 
 def test_slice(data: List, collection: Collection):
     slice = data[5:16]
-    slice_stack = slice_(collection, 5, 15)
+    slice_stack = partition(collection, 5, 15)
 
     for i, el in enumerate(slice):
         assert seek(slice_stack, i) == el

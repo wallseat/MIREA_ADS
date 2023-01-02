@@ -19,7 +19,7 @@ class TREE__:
 
 
 if __name__ == "__main__":
-    # $С=A ⋃пр B$#
+    # $С=A ⋃пр B$
     from itertools import chain
     from random import randint
 

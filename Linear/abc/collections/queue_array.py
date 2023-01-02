@@ -160,7 +160,7 @@ def swap(queue: Queue[VT], pos1: int, pos2: int) -> None:  #  $CX_DEF: 216*n + 7
     push_by_pos(queue, temp, pos2)  # 54n + 18
 
 
-def slice_(queue: Queue[VT], l: int = 0, r: int = -1) -> Queue[VT]:  # $CX_DEF: 99*n + 6$
+def partition(queue: Queue[VT], l: int = 0, r: int = -1) -> Queue[VT]:  # $CX_DEF: 99*n + 6$
     buff = Queue[VT]()  # 2
 
     if r == -1:  # 1
@@ -271,7 +271,7 @@ def test_swap(data: List, collection: Collection):
 
 def test_slice(data: List, collection: Collection):
     slice = data[5:16]
-    slice_stack = slice_(collection, 5, 15)
+    slice_stack = partition(collection, 5, 15)
 
     for i, el in enumerate(slice):
         assert seek(slice_stack, i) == el

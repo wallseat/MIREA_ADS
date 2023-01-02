@@ -35,10 +35,7 @@ def save_as_inc_m(matrix: list[list[int]], file_path: str):
             {
                 "dim": len(matrix),
                 "format": "inc_matrix",
-                "data": [
-                    [inc_matrix[i][j] for i in range(len(inc_matrix))]
-                    for j in range(dim)
-                ],
+                "data": [[inc_matrix[i][j] for i in range(len(inc_matrix))] for j in range(dim)],
             },
             f,
         )

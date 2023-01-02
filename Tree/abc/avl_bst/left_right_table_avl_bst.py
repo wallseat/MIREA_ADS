@@ -46,9 +46,7 @@ class AVL_BST(Generic[VT]):
         return self._nodes[index] if index is not None else None
 
     def _fix_height(self, root: int):
-        self._nodes[root].height = 1 + max(
-            self._height(self._left[root]), self._height(self._right[root])
-        )
+        self._nodes[root].height = 1 + max(self._height(self._left[root]), self._height(self._right[root]))
 
     def _insert(self, root: int, value: VT) -> int:
         if root is None:

@@ -19,7 +19,7 @@ class TREE__:
 
 
 if __name__ == "__main__":
-    # $С = A \ B$#
+    # $С = A \ B$
     from random import randint
 
     tree_a = TREE__[int]()

@@ -19,7 +19,7 @@ class TREE__:
 
 
 if __name__ == "__main__":
-    # $А=A ⋃симB$#
+    # $А=A ⋃симB$
     from random import randint
 
     tree_a = TREE__[int]()
