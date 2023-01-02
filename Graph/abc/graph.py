@@ -1,8 +1,8 @@
 import json
 from typing import Dict, List, Optional, Tuple
 
-_T_ADJ_MATRIX = List[List[int]]
-_T_PATH = List[int]
+T_ADJ_MATRIX = List[List[int]]
+T_PATH = List[int]
 
 
 class Vertex:
@@ -229,7 +229,7 @@ class Graph:
         else:
             raise Exception(f"Ребра с таким набором вершин не существует! ({v1}, {v2})")
 
-    def to_adj_matrix(self) -> _T_ADJ_MATRIX:
+    def to_adj_matrix(self) -> T_ADJ_MATRIX:
         adj_matrix = [[0 for _ in range(len(self._vertices))] for _ in range(len(self._vertices))]
         for edge in self._edges:
             adj_matrix[edge._vertices[0]][edge._vertices[1]] = edge.len
@@ -252,7 +252,7 @@ if __name__ == "__main__":
     import sys
 
     def print_usage():
-        print(f"Использование: {sys.argv[0]} <режим> [ИМЯ_ФАЙЛА]")
+        print(f"Использование: {sys.argv[0]} [ИМЯ_ФАЙЛА] <режим>")
         print(
             "Режимы:\n"
             "\texample - загружает граф и выводит его компоненты и матрицу смежности\n"
@@ -263,7 +263,7 @@ if __name__ == "__main__":
         print_usage()
         exit(-1)
 
-    mode, filename, *_ = sys.argv[1:]
+    filename, mode, *_ = sys.argv[1:]
 
     graph = Graph()
     try:

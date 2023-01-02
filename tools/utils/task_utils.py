@@ -105,11 +105,13 @@ def create_linear_task(task_num: int) -> None:
         collection_file = collections_folder / "queue_pointers_head.py"
         link_type = "Указатели"
         collection_type = "Очередь с 1 головой"
+        step /= 2
 
     elif normalized_task_num % 8 == 3:  # Указатели, Стек
         collection_file = collections_folder / "stack_pointers.py"
         link_type = "Указатели"
         collection_type = "Стек"
+        step /= 2
 
     elif normalized_task_num % 8 == 4:  # Массив, очередь
         collection_file = collections_folder / "queue_array.py"
@@ -142,6 +144,7 @@ def create_linear_task(task_num: int) -> None:
         sort_file = sorts_folder / "shell_sort.py"
         report_theory_template = sort_theory_folder / "shell_sort.docx"
         sort_name = "Шелла"
+        step //= 2
 
     elif normalized_task_num < 24:  # Бинарная вставка
         sort_file = sorts_folder / "binary_insertion_sort.py"
@@ -171,25 +174,25 @@ def create_linear_task(task_num: int) -> None:
         sort_file = sorts_folder / "heap_sort.py"
         report_theory_template = sort_theory_folder / "heap_sort.docx"
         sort_name = "Пирамидальная сортировка"
-        step *= 1.5
+        step //= 2
 
     elif normalized_task_num < 64:  # Простая вставка
         sort_file = sorts_folder / "simple_insertion_sort.py"
         report_theory_template = sort_theory_folder / "simple_insertion_sort.docx"
         sort_name = "Простая вставка"
-        step /= 2
+        step //= 2
 
     elif normalized_task_num < 72:  # Простой выбор
         sort_file = sorts_folder / "selection_sort.py"
         report_theory_template = sort_theory_folder / "selection_sort.docx"
         sort_name = "Простой выбор"
-        step /= 4
+        step //= 4
 
     elif normalized_task_num < 80:  # Пузырьковая
         sort_file = sorts_folder / "bubble_sort.py"
         report_theory_template = sort_theory_folder / "bubble_sort.docx"
         sort_name = "Пузырьковая"
-        step /= 4
+        step //= 4
 
     elif normalized_task_num < 88:  # Распределяющий подсчет
         sort_file = sorts_folder / "distributive_counting_sort.py"
@@ -207,6 +210,7 @@ def create_linear_task(task_num: int) -> None:
         sort_file = sorts_folder / "heap_sort.py"
         report_theory_template = sort_theory_folder / "heap_sort.docx"
         sort_name = "Пирамидальная сортировка"
+        step //= 4
 
     collection = prepare_collection(collection_file)
     sort = prepare_sort(sort_file)
@@ -320,7 +324,7 @@ def create_graph_task(task_num: int) -> None:
 
     task_py_file = create_task_file(task_type, task_num)
 
-    graph_abc = task_type.get_base_path() / "graph.py"
+    graph_abc = task_type.get_base_path() / "abc" / "graph.py"
 
     task_py_file.write_text(graph_abc.read_text())
 

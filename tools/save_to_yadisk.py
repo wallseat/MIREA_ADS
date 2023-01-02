@@ -1,7 +1,7 @@
 import os
 import shutil
+import sys
 import zipfile
-from hashlib import md5
 from pathlib import Path
 from threading import Thread
 from typing import List
@@ -9,7 +9,6 @@ from typing import List
 import yadisk
 from pydantic import BaseSettings
 from utils.task_utils import TaskType, create_linear_task, create_tree_task
-from yadisk.objects.resources import ResourceObject
 
 
 class Settings(BaseSettings):
@@ -23,33 +22,33 @@ class Settings(BaseSettings):
 settings = Settings()
 
 
-def upload_to_yd_old(disk: yadisk.YaDisk, files: List[Path]) -> None:
-    for file in files:
-        if file.is_file():
-            with open(file, "rb") as f:
-                file_hash = md5(f.read()).hexdigest()
-            if not disk.exists(f"{settings.FOLDER_PATH}/{lab_name}/{file.name}"):
-                disk.upload(
-                    file.as_posix(),
-                    f"{settings.FOLDER_PATH}/{lab_name}/{file.name}",
-                    n_retries=5,
-                    timeout=60,
-                )
-                added_resources.append(file.name)
+# def upload_to_yd_old(disk: yadisk.YaDisk, files: List[Path]) -> None:
+#     for file in files:
+#         if file.is_file():
+#             with open(file, "rb") as f:
+#                 file_hash = md5(f.read()).hexdigest()
+#             if not disk.exists(f"{settings.FOLDER_PATH}/{lab_name}/{file.name}"):
+#                 disk.upload(
+#                     file.as_posix(),
+#                     f"{settings.FOLDER_PATH}/{lab_name}/{file.name}",
+#                     n_retries=5,
+#                     timeout=60,
+#                 )
+#                 added_resources.append(file.name)
 
-            else:
-                resource: ResourceObject = disk.get_meta(f"{settings.FOLDER_PATH}/{lab_name}/{file.name}")
-                if resource["md5"] != file_hash:
-                    disk.upload(
-                        file.as_posix(),
-                        f"{settings.FOLDER_PATH}/{lab_name}/{file.name}",
-                        overwrite=True,
-                        n_retries=5,
-                        timeout=60,
-                    )
-                    changed_resources.append(file.name)
+#             else:
+#                 resource: ResourceObject = disk.get_meta(f"{settings.FOLDER_PATH}/{lab_name}/{file.name}")
+#                 if resource["md5"] != file_hash:
+#                     disk.upload(
+#                         file.as_posix(),
+#                         f"{settings.FOLDER_PATH}/{lab_name}/{file.name}",
+#                         overwrite=True,
+#                         n_retries=5,
+#                         timeout=60,
+#                     )
+#                     changed_resources.append(file.name)
 
-            os.remove(file)
+#             os.remove(file)
 
 
 def upload_to_yd(disk: yadisk.YaDisk, task_type: TaskType, task_no_s: int, task_no_e: int) -> None:
@@ -67,8 +66,10 @@ def upload_to_yd(disk: yadisk.YaDisk, task_type: TaskType, task_no_s: int, task_
                 task_folder_path = create_tree_task(task_no)
             elif task_type == TaskType.LINEAR:
                 task_folder_path = create_linear_task(task_no)
-            else:
-                raise NotImplementedError
+            elif task_type == TaskType.GRAPH:
+                task_folder_path = Path(f"Graph/{task_no}")
+                if not task_folder_path.exists():
+                    continue
 
             lab_name = task_type.get_task_prefix().capitalize()
 
@@ -117,10 +118,22 @@ if __name__ == "__main__":
 
     WORKERS_NUM = os.cpu_count() // 2
 
+    labs_set = []
+    args = sys.argv[1:]
+    if args:
+        if "t" in args:
+            labs_set.append(TaskType.TREE)
+        if "l" in args:
+            labs_set.append(TaskType.LINEAR)
+        if "g" in args:
+            labs_set.append(TaskType.GRAPH)
+    else:
+        labs_set = TaskType
+
     added_resources = []
     changed_resources = []
     try:
-        for lab_type in TaskType:
+        for lab_type in labs_set:
             lab_name = lab_type.get_task_prefix().capitalize()
 
             try:
@@ -128,44 +141,42 @@ if __name__ == "__main__":
             except yadisk.exceptions.PathExistsError:
                 pass
 
-            if lab_type in (TaskType.TREE, TaskType.LINEAR):
-                tasks_per_worker = 100 // WORKERS_NUM + 1
-                from_task = 1
+            tasks_per_worker = 100 // WORKERS_NUM + 1
+            from_task = 1
 
-                workers: List[Thread] = []
-                while from_task < 100:
-                    t = Thread(
-                        target=upload_to_yd,
-                        args=(disk, lab_type, from_task, min(100, from_task + tasks_per_worker)),
-                    )
-                    workers.append(t)
-                    t.start()
-                    from_task += tasks_per_worker + 1
+            workers: List[Thread] = []
+            while from_task < 100:
+                t = Thread(
+                    target=upload_to_yd,
+                    args=(disk, lab_type, from_task, min(100, from_task + tasks_per_worker)),
+                )
+                workers.append(t)
+                t.start()
+                from_task += tasks_per_worker + 1
 
-                for worker in workers:
-                    worker.join()
+            for worker in workers:
+                worker.join()
 
-            else:
-                # for task in lab_type.get_base_path().iterdir():
-                #     if task.is_dir() and task.name.isdigit():
-                #         zip_name = f"{lab_name}_{task.name}.zip"
+            # else:
+            #     for task in lab_type.get_base_path().iterdir():
+            #         if task.is_dir() and task.name.isdigit():
+            #             zip_name = f"{lab_name}_{task.name}.zip"
 
-                #         with zipfile.ZipFile(TEMP_PATH / zip_name, "w", zipfile.ZIP_DEFLATED) as zip_file:
-                #             for entry in task.rglob("*"):
-                #                 zip_file.write(entry, entry.relative_to(task))
+            #             with zipfile.ZipFile(TEMP_PATH / zip_name, "w", zipfile.ZIP_DEFLATED) as zip_file:
+            #                 for entry in task.rglob("*"):
+            #                     zip_file.write(entry, entry.relative_to(task))
 
-                # file_per_worker = len(os.listdir(TEMP_PATH)) // WORKERS_NUM + 1
-                # files = list(TEMP_PATH.iterdir())
-                # workers: List[Thread] = []
-                # while files:
-                #     t = Thread(target=upload_to_yd_old, args=(disk, files[:file_per_worker]))
-                #     workers.append(t)
-                #     t.start()
-                #     del files[:file_per_worker]
+            #     file_per_worker = len(os.listdir(TEMP_PATH)) // WORKERS_NUM + 1
+            #     files = list(TEMP_PATH.iterdir())
+            #     workers: List[Thread] = []
+            #     while files:
+            #         t = Thread(target=upload_to_yd_old, args=(disk, files[:file_per_worker]))
+            #         workers.append(t)
+            #         t.start()
+            #         del files[:file_per_worker]
 
-                # for worker in workers:
-                #     worker.join()
-                pass
+            #     for worker in workers:
+            #         worker.join()
 
     except Exception:
         [os.remove(file) for file in TEMP_PATH.iterdir()]

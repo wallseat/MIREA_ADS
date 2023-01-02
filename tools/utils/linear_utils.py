@@ -4,7 +4,7 @@ from pathlib import Path
 from typing import Dict, List, Optional, Tuple, TypeVar
 
 import sympy
-from sympy.core import Expr, Number, postorder_traversal
+from sympy.core import Expr, Number
 from sympy.parsing.sympy_parser import parse_expr
 
 _VT = TypeVar("_VT")
@@ -232,7 +232,7 @@ def solve_cxdefs(sort: SortDef, collection: CollectionDef) -> str:
     sort_asymptotic = cur_expr.simplify(evaluate=True).expand()
     sort.sort_asymptotic = sort_asymptotic
 
-    max_powered_part = str(list(postorder_traversal(sort_asymptotic, keys=True))[-2])
+    max_powered_part = str(sort_asymptotic).split(" ", maxsplit=1)[0]
     if max_powered_part[0].isdigit():
         max_powered_part = max_powered_part.split("*", maxsplit=1)[1]  # remove number multiplier ex: 2*n -> n
     sort_bigO_asymptotic = parse_expr(max_powered_part)
