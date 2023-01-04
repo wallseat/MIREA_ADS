@@ -22,35 +22,6 @@ class Settings(BaseSettings):
 settings = Settings()
 
 
-# def upload_to_yd_old(disk: yadisk.YaDisk, files: List[Path]) -> None:
-#     for file in files:
-#         if file.is_file():
-#             with open(file, "rb") as f:
-#                 file_hash = md5(f.read()).hexdigest()
-#             if not disk.exists(f"{settings.FOLDER_PATH}/{lab_name}/{file.name}"):
-#                 disk.upload(
-#                     file.as_posix(),
-#                     f"{settings.FOLDER_PATH}/{lab_name}/{file.name}",
-#                     n_retries=5,
-#                     timeout=60,
-#                 )
-#                 added_resources.append(file.name)
-
-#             else:
-#                 resource: ResourceObject = disk.get_meta(f"{settings.FOLDER_PATH}/{lab_name}/{file.name}")
-#                 if resource["md5"] != file_hash:
-#                     disk.upload(
-#                         file.as_posix(),
-#                         f"{settings.FOLDER_PATH}/{lab_name}/{file.name}",
-#                         overwrite=True,
-#                         n_retries=5,
-#                         timeout=60,
-#                     )
-#                     changed_resources.append(file.name)
-
-#             os.remove(file)
-
-
 def upload_to_yd(disk: yadisk.YaDisk, task_type: TaskType, task_no_s: int, task_no_e: int) -> None:
     for task_no in range(task_no_s, task_no_e + 1):
         try:
@@ -157,27 +128,6 @@ if __name__ == "__main__":
 
             for worker in workers:
                 worker.join()
-
-            # else:
-            #     for task in lab_type.get_base_path().iterdir():
-            #         if task.is_dir() and task.name.isdigit():
-            #             zip_name = f"{lab_name}_{task.name}.zip"
-
-            #             with zipfile.ZipFile(TEMP_PATH / zip_name, "w", zipfile.ZIP_DEFLATED) as zip_file:
-            #                 for entry in task.rglob("*"):
-            #                     zip_file.write(entry, entry.relative_to(task))
-
-            #     file_per_worker = len(os.listdir(TEMP_PATH)) // WORKERS_NUM + 1
-            #     files = list(TEMP_PATH.iterdir())
-            #     workers: List[Thread] = []
-            #     while files:
-            #         t = Thread(target=upload_to_yd_old, args=(disk, files[:file_per_worker]))
-            #         workers.append(t)
-            #         t.start()
-            #         del files[:file_per_worker]
-
-            #     for worker in workers:
-            #         worker.join()
 
     except Exception:
         [os.remove(file) for file in TEMP_PATH.iterdir()]
