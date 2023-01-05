@@ -1,8 +1,11 @@
 import json
 import re
+import shutil
 from enum import Enum
 from pathlib import Path
-from subprocess import getoutput
+from subprocess import PIPE, Popen
+from textwrap import indent
+from typing import Dict, List
 
 import matplotlib.pyplot as plt
 from docx.shared import Mm
@@ -49,8 +52,42 @@ def create_task_report_file(task_type: TaskType, task_num: int) -> Path:
     return task_py_file
 
 
-def get_exec_out(task_py_file: Path, *args: str) -> str:
-    return getoutput("python3 " + str(task_py_file) + " " + " ".join(args))
+def get_exec_out(
+    task_py_file: Path,
+    args: List[str] = None,
+    input_: List[str] = None,
+    timeout: float = None,
+) -> str:
+    if not args:
+        args = []
+
+    proc = Popen(
+        ["python3", task_py_file.as_posix(), *args],
+        stdout=PIPE,
+        stderr=PIPE,
+        stdin=PIPE,
+        text=True,
+    )
+    input_str = None
+    if input_:
+        input_str = "".join(map(lambda s: s + "\n", input_))
+
+    try:
+        out, err = proc.communicate(input=input_str, timeout=timeout)
+    except TimeoutError as e:
+        raise RuntimeError(
+            "Превышено время выполнения программы. Возможно ожидался ввод.\n" + indent(str(e), "\t")
+        )
+
+    if err:
+        raise RuntimeError(
+            f"\n* Произошла ошибка при выполнении: {task_py_file}\n"
+            f"|\tАргументы: {args}\n"
+            f"|\tВходные данные: {input_}\n"
+            "|\tОшибка:\n" + indent(err, "\t|\t")
+        )
+
+    return out.strip()
 
 
 def create_execution_screenshot(
@@ -59,18 +96,18 @@ def create_execution_screenshot(
     image_name: str = "task_out.png",
     font_size: int = 16,
 ) -> Path:
-    lines_num = len(exec_out.splitlines())
-
     font = ImageFont.truetype(Path("fonts/CascadiaMono.ttf").as_posix(), font_size)
-    padding = 5
+    padding = font_size // 2
 
-    width = max([font.getsize(line)[0] for line in exec_out.splitlines()]) + padding * 2
-    height = (font.getsize(exec_out)[1] + 2) * lines_num + padding * 2
+    width, height = font.getsize_multiline(exec_out)
+
+    width += 2 * padding
+    height += 2 * padding
 
     img = Image.new("RGB", (width, height), (255, 255, 255))
     d1 = ImageDraw.Draw(img)
 
-    d1.text((padding, padding), exec_out, (0, 0, 0), font=font)
+    d1.text((padding, padding // 3 * 1), exec_out, (0, 0, 0), font=font)
 
     out_img = folder / image_name
     img.save(out_img, "PNG")
@@ -78,7 +115,27 @@ def create_execution_screenshot(
     return out_img
 
 
-def create_linear_task(task_num: int) -> None:
+def read_abc_file(path: Path, slice_after: bool = False) -> str:
+    lines = path.read_text().splitlines()
+    end_of_abc = -1
+
+    for i, line in enumerate(lines):
+        if line.startswith('if __name__ == "__main__":'):
+            end_of_abc = i
+            break
+
+    if slice_after:
+        if end_of_abc == -1:
+            end_of_abc = 0
+        lines = lines[end_of_abc:]
+    else:
+        if end_of_abc != -1:
+            lines = lines[:end_of_abc]
+
+    return "\n".join(lines)
+
+
+def create_linear_task(task_num: int) -> Path:
     task_type = TaskType.LINEAR
     normalized_task_num = task_num - 1
 
@@ -221,7 +278,7 @@ def create_linear_task(task_num: int) -> None:
     task_file = create_task_file(task_type, task_num)
     task_file.write_text(code)
 
-    exec_example_out = get_exec_out(task_file, "example")
+    exec_example_out = get_exec_out(task_file, args=["example"])
     task_out_example = create_execution_screenshot(
         task_file.parent,
         exec_example_out,
@@ -229,7 +286,7 @@ def create_linear_task(task_num: int) -> None:
         font_size=24,
     )
 
-    exec_tests_out = get_exec_out(task_file, "tests")
+    exec_tests_out = get_exec_out(task_file, args=["tests"])
     task_out_tests = create_execution_screenshot(
         task_file.parent,
         exec_tests_out,
@@ -319,65 +376,253 @@ def create_linear_task(task_num: int) -> None:
     return task_file.parent
 
 
-def create_graph_task(task_num: int) -> None:
+def create_graph_task(task_num: int, raise_not_full: bool = False) -> None:
+    def read_task_solve(file_path: Path) -> str:
+        lines = file_path.read_text().splitlines()
+        start = 0
+        end = 0
+
+        for i, line in enumerate(lines):
+            if "# START" in line:
+                start = i + 1
+                continue
+            if "# END" in line:
+                end = i
+                break
+
+        if start == 0 or end == 0:
+            raise ValueError("Неправильный формат файла решения")
+
+        return "\n".join(lines[start:end])
+
     task_type = TaskType.GRAPH
+    normalized_task_num = task_num - 1
+
+    graph_abc_folder = task_type.get_base_path() / "abc"
+
+    graph_class_file = graph_abc_folder / "graph.py"
+    graph_class_code = read_abc_file(graph_class_file)
+    graph_runner_code = read_abc_file(graph_class_file, slice_after=True)
+
+    # load all existing graph tasks
+    task_path: Dict[int, Path] = {}
+    for folder in (graph_abc_folder / "tasks").glob("*"):
+        comps = folder.name.split("__")
+        for comp in comps:
+            if "-" in comp:
+                task_from, task_to = map(int, comp.split("-"))
+                for num in range(task_from, task_to + 1):
+                    task_path[num] = folder
+            else:
+                task_path[int(comp)] = folder
+
+    if task_num not in task_path:
+        task_py_file = create_task_file(task_type, task_num)
+        task_py_file.write_text(graph_class_code + "\n" + graph_runner_code)
+
+        if raise_not_full:
+            raise ValueError(f"Решение задачи для варианта {task_num} не было найдено")
+
+        print(f"Решение задачи для варианта {task_num} не было найдено, создан пустой шаблон")
+        return
+
+    graph_definitions = {0: "adj_matrix", 1: "inc_matrix", 2: "adj_list", 3: "edge_list"}
+
+    if normalized_task_num <= 39:
+        graph_definition = graph_definitions[normalized_task_num % 4]
+
+    elif 40 <= normalized_task_num <= 43:
+        graph_definition = graph_definitions[(normalized_task_num - 40) % 2]
+
+    elif 44 <= normalized_task_num <= 52:
+        graph_definition = graph_definitions[(normalized_task_num - 44) % 4]
+
+    elif 53 <= normalized_task_num <= 55:
+        graph_definition = graph_definitions[0]
+
+    elif 56 <= normalized_task_num <= 71:
+        graph_definition = graph_definitions[(normalized_task_num - 56) % 4]
+
+    elif normalized_task_num >= 72:
+        match normalized_task_num:
+            case 72 | 75 | 77 | 78 | 80 | 83 | 86 | 89 | 93 | 97:
+                graph_definition = graph_definitions[0]
+            case 73 | 74 | 76 | 79 | 81 | 84 | 87 | 90 | 94 | 98:
+                graph_definition = graph_definitions[2]
+            case 82 | 85 | 88 | 91 | 95 | 99:
+                graph_definition = graph_definitions[1]
+            case 92 | 96:
+                graph_definition = graph_definitions[3]
+
+    task_abc_folder = task_path[task_num]
+    task_matrix_txt = task_abc_folder / "matrix.txt"
+    task_graph_png = task_abc_folder / "graph.png"
+    task_solve_file = task_abc_folder / "task.py"
+    task_algo_file = task_abc_folder / "algo.txt"
+    task_outer_file = task_abc_folder / "outer.txt"
+    needed_files = [task_matrix_txt, task_graph_png, task_solve_file, task_algo_file, task_outer_file]
+
+    if not all(
+        map(
+            lambda f: f.exists(),
+            needed_files,
+        )
+    ):
+        raise RuntimeError(
+            f"Не найдены все необходимые файлы для варианта {task_num}\n"
+            + "\n".join(
+                [f.name + ": " + ("Найден" if f.exists() else "Не найден") for f in needed_files],
+            )
+        )
 
     task_py_file = create_task_file(task_type, task_num)
 
-    graph_abc = task_type.get_base_path() / "abc" / "graph.py"
+    # Создание файла описания графа по заданию
+    matrix_converters = graph_abc_folder / "matrix_converters"
+    definition_theories = graph_abc_folder / "definition_theory_template"
+    match graph_definition:
+        case "adj_matrix":
+            matrix_converter = matrix_converters / "adj_m_to_adj_m.py"
+            definition_theory = definition_theories / "adj_matrix.docx"
+            graph_definition_type = "Матрица смежности"
 
-    task_py_file.write_text(graph_abc.read_text())
+        case "inc_matrix":
+            matrix_converter = matrix_converters / "adj_m_to_inc_m.py"
+            definition_theory = definition_theories / "inc_matrix.docx"
+            graph_definition_type = "Матрица инцидентности"
+
+        case "adj_list":
+            matrix_converter = matrix_converters / "adj_m_to_adj_list.py"
+            definition_theory = definition_theories / "adj_list.docx"
+            graph_definition_type = "Список смежности"
+
+        case "edge_list":
+            matrix_converter = matrix_converters / "adj_m_to_edge_list.py"
+            definition_theory = definition_theories / "edge_list.docx"
+            graph_definition_type = "Список дуг"
+
+    graph_definition_file = task_py_file.parent / "graph_definition.json"
+
+    if err := get_exec_out(matrix_converter, args=[str(task_matrix_txt), str(graph_definition_file)]):
+        raise RuntimeError(f"Ошибка при конвертации матрицы варианта {task_num}.\n{err}")
+
+    shutil.copy(task_graph_png, task_py_file.parent / "graph.png")
+
+    # Формируем решение задачи
+    task_solve_code = read_task_solve(task_solve_file)
+
+    code = (
+        graph_class_code
+        + "\n"
+        + task_solve_code
+        + "\n"
+        + graph_runner_code.replace("pass  # TASK_EXECUTION", "task(graph)")
+    )
+
+    task_py_file.write_text(code)
+
+    task_inputs = []
+    task_inputs_file = task_abc_folder / "task_exec_inputs.txt"
+    if task_inputs_file.exists():
+        task_inputs = task_inputs_file.read_text().splitlines()
+
+    # генерируем скриншоты
+    example_out_screenshot = create_execution_screenshot(
+        task_py_file.parent,
+        get_exec_out(task_py_file, args=[str(graph_definition_file), "example"]),
+        "example_out.png",
+    )
+
+    execs_out = []
+    if task_inputs:  # если есть входные данные, то запускаем задачу с ними
+        for task_input in task_inputs:
+            execs_out.append(
+                get_exec_out(
+                    task_py_file,
+                    args=[str(graph_definition_file), "task"],
+                    input_=task_input.split(),
+                    timeout=10,
+                )
+            )
+    else:  # иначе запускаем задачу без входных данных
+        execs_out.append(
+            get_exec_out(
+                task_py_file,
+                args=[str(graph_definition_file), "task"],
+                timeout=10,
+            )
+        )
+
+    task_out_screenshot = create_execution_screenshot(
+        task_py_file.parent,
+        "\n\n".join(execs_out),
+        "task_out.png",
+    )
+
+    graph_report = DocxTemplate(graph_abc_folder / "graph_report.docx")
+    definition_theory_sd = graph_report.new_subdoc(definition_theory)
+
+    task_report_file = create_task_report_file(task_type, task_num)
+    graph_report.render(
+        {
+            "task_num": task_num,
+            "task_algo": task_algo_file.read_text(),
+            "graph_definition_type": graph_definition_type,
+            "definition_theory": definition_theory_sd,
+            "task_code": code,
+            "graph_png": InlineImage(
+                graph_report,
+                task_graph_png.as_posix(),
+                width=Mm(70),
+            ),
+            "example_out_screenshot": InlineImage(
+                graph_report,
+                example_out_screenshot.as_posix(),
+                width=Mm(50),
+            ),
+            "task_out_screenshot": InlineImage(
+                graph_report,
+                task_out_screenshot.as_posix(),
+                width=Mm(50),
+            ),
+            "task_outer": task_outer_file.read_text(),
+        }
+    )
+    graph_report.save(task_report_file)
+
+    return task_py_file.parent
 
 
 def create_tree_task(task_num: int) -> Path:
     task_type = TaskType.TREE
     normalized_task_num = task_num - 1
 
-    def read_abc_file(path: Path, slice_after: bool = False) -> str:
-        lines = path.read_text().splitlines()
-        end_of_abc = -1
-
-        for i, line in enumerate(lines):
-            if line.startswith('if __name__ == "__main__":'):
-                end_of_abc = i
-                break
-
-        if slice_after:
-            if end_of_abc == -1:
-                end_of_abc = 0
-            lines = lines[end_of_abc:]
-        else:
-            if end_of_abc != -1:
-                lines = lines[:end_of_abc]
-
-        return "\n".join(lines)
-
     tree_abc_folder = task_type.get_base_path() / "abc"
 
     # Вычисление кода дерева
-    if normalized_task_num % 50 <= 19:  # Дерево двоичного поиска
+    if 0 <= (sub_task_num := normalized_task_num % 50) <= 19:  # Дерево двоичного поиска
         tree_folder = tree_abc_folder / "bst"
         tree_class_name = "BST"
 
         tree_report = DocxTemplate(tree_folder / "bst_report.docx")
 
-        if normalized_task_num % 20 <= 4:  # Указатель (курсор) на родителя
+        if sub_task_num % 20 <= 4:  # Указатель (курсор) на родителя
             tree_code = read_abc_file(tree_folder / "parent_pointer_bst.py")
             tree_realization = "Указатель (курсор) на родителя"
 
-        elif normalized_task_num % 20 <= 9:  # Список сыновей
+        elif sub_task_num % 20 <= 9:  # Список сыновей
             tree_code = read_abc_file(tree_folder / "child_list_bst.py")
             tree_realization = "Список сыновей"
 
-        elif normalized_task_num % 20 <= 14:  # Левый сын, правый брат (указатели)
+        elif sub_task_num % 20 <= 14:  # Левый сын, правый брат (указатели)
             tree_code = read_abc_file(tree_folder / "left_right_pointer_bst.py")
             tree_realization = "Левый сын, правый брат (указатели)"
 
-        elif normalized_task_num % 20 <= 19:  # Левый сын, правый брат (таблица, массив)
+        elif sub_task_num % 20 <= 19:  # Левый сын, правый брат (таблица, массив)
             tree_code = read_abc_file(tree_folder / "left_right_table_bst.py")
             tree_realization = "Левый сын, правый брат (таблица, массив)"
 
-    elif normalized_task_num % 50 <= 34:  # Рандомизированное дерево двоичного поиска
+    elif 20 <= (sub_task_num := normalized_task_num % 50) <= 34:  # Рандомизированное дерево двоичного поиска
         tree_folder = tree_abc_folder / "randomized_bst"
         tree_class_name = "RandomizedBST"
 
@@ -395,21 +640,21 @@ def create_tree_task(task_num: int) -> Path:
             tree_code = read_abc_file(tree_folder / "left_right_table_randomized_bst.py")
             tree_realization = "Левый сын, правый брат (таблица, массив)"
 
-    elif normalized_task_num % 50 <= 49:  # AVL-дерево
+    elif 35 <= (sub_task_num := normalized_task_num % 50) <= 49:  # AVL-дерево
         tree_class_name = "AVL_BST"
         tree_folder = tree_abc_folder / "avl_bst"
 
         tree_report = DocxTemplate(tree_folder / "avl_bst_report.docx")
 
-        if (normalized_task_num - 35) % 15 <= 4:  # Список сыновей
+        if (sub_task_num - 35) % 15 <= 4:  # Список сыновей
             tree_code = read_abc_file(tree_folder / "child_list_avl_bst.py")
             tree_realization = "Список сыновей"
 
-        elif (normalized_task_num - 35) % 15 <= 9:  # Левый сын, правый брат, указатели
+        elif (sub_task_num - 35) % 15 <= 9:  # Левый сын, правый брат, указатели
             tree_code = read_abc_file(tree_folder / "left_right_pointer_avl_bst.py")
             tree_realization = "Левый сын, правый брат (указатели)"
 
-        elif (normalized_task_num - 35) % 15 <= 14:  # Левый сын, правый брат, массив
+        elif (sub_task_num - 35) % 15 <= 14:  # Левый сын, правый брат, массив
             tree_code = read_abc_file(tree_folder / "left_right_table_avl_bst.py")
             tree_realization = "Левый сын, правый брат (таблица, массив)"
 
