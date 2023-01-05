@@ -197,7 +197,7 @@ class AVL_BST(Generic[VT]):
         if root is not None:
             nodes_list.append(root)
             self._traverse_preorder(root.left_right[0], nodes_list)
-            self._traverse_preorder(root.left_right[0], nodes_list)
+            self._traverse_preorder(root.left_right[1], nodes_list)
 
         return nodes_list
 

@@ -22,8 +22,8 @@ class Settings(BaseSettings):
 settings = Settings()
 
 
-def upload_to_yd(disk: yadisk.YaDisk, task_type: TaskType, task_no_s: int, task_no_e: int) -> None:
-    for task_no in range(task_no_s, task_no_e + 1):
+def upload_to_yd(disk: yadisk.YaDisk, task_type: TaskType, task_set: List[int]) -> None:
+    for task_no in task_set:
         try:
             zip_path = None
             task_folder_path = None
@@ -60,7 +60,7 @@ def upload_to_yd(disk: yadisk.YaDisk, task_type: TaskType, task_no_s: int, task_
                 n_retries=5,
                 timeout=60,
             )
-            changed_resources.append(zip_path.name)
+            added_resources.append(zip_path.name)
         except Exception as e:
             print(f"Ошибка при загрузке задания {lab_name}_{task_no}: {e}")
 
@@ -89,7 +89,9 @@ if __name__ == "__main__":
             file.unlink()
 
     WORKERS_NUM = os.cpu_count() // 2
+    TOTAL_TASKS = 100
 
+    tasks = []
     labs_set = []
     args = sys.argv[1:]
     if args:
@@ -99,11 +101,19 @@ if __name__ == "__main__":
             labs_set.append(TaskType.LINEAR)
         if "g" in args:
             labs_set.append(TaskType.GRAPH)
-    else:
-        labs_set = TaskType
+
+        if not labs_set:
+            labs_set = TaskType
+
+        for arg in args:
+            if arg.isdigit():
+                task = int(arg)
+                if task > 0 and task <= 100:
+                    tasks.append(task)
+        if not tasks:
+            tasks = list(range(1, 100 + 1))
 
     added_resources = []
-    changed_resources = []
     try:
         for lab_type in labs_set:
             lab_name = lab_type.get_task_prefix().capitalize()
@@ -113,18 +123,18 @@ if __name__ == "__main__":
             except yadisk.exceptions.PathExistsError:
                 pass
 
-            tasks_per_worker = 100 // WORKERS_NUM + 1
-            from_task = 1
+            tasks_per_worker = len(tasks) // WORKERS_NUM + 1
+            _tasks = tasks.copy()
 
             workers: List[Thread] = []
-            while from_task < 100:
+            while _tasks:
                 t = Thread(
                     target=upload_to_yd,
-                    args=(disk, lab_type, from_task, min(100, from_task + tasks_per_worker)),
+                    args=(disk, lab_type, _tasks[:tasks_per_worker]),
                 )
                 workers.append(t)
                 t.start()
-                from_task += tasks_per_worker + 1
+                del _tasks[:tasks_per_worker]
 
             for worker in workers:
                 worker.join()
@@ -134,4 +144,3 @@ if __name__ == "__main__":
         exit(0)
 
     print("Добавлены архивы:  " + ", ".join(added_resources))
-    print("Обновлены архивы:  " + ", ".join(changed_resources))
