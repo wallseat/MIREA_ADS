@@ -50,7 +50,7 @@ def upload_to_yd(disk: yadisk.YaDisk, task_type: TaskType, task_set: List[int]) 
                 try:
                     task_folder_path = create_graph_task(task_no, raise_not_full=True)
                 except ValueError as e:
-                    print(f"Ошибка при создании задания {task_type}_{task_no}: {e}")
+                    print(f"Ошибка при создании задания {task_type.name}_{task_no}:\n\t{e}")
                     if not task_folder_path_exist_before:
                         shutil.rmtree(Path(f"Graph/{task_no}"))
 

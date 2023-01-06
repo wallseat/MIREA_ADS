@@ -399,6 +399,7 @@ def create_graph_task(task_num: int, raise_not_full: bool = False) -> None:
     normalized_task_num = task_num - 1
 
     graph_abc_folder = task_type.get_base_path() / "abc"
+    graph_readme_file = task_type.get_base_path() / "README.md"
 
     graph_class_file = graph_abc_folder / "graph.py"
     graph_class_code = read_abc_file(graph_class_file)
@@ -507,6 +508,7 @@ def create_graph_task(task_num: int, raise_not_full: bool = False) -> None:
         raise RuntimeError(f"Ошибка при конвертации матрицы варианта {task_num}.\n{err}")
 
     shutil.copy(task_graph_png, task_py_file.parent / "graph.png")
+    shutil.copy(graph_readme_file, task_py_file.parent / "README.md")
 
     # Формируем решение задачи
     task_solve_code = read_task_solve(task_solve_file)

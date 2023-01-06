@@ -1,7 +1,7 @@
-# START
-import copy
-
 from Graph.abc.graph import T_ADJ_MATRIX, Graph
+
+# START
+import copy  # isort: skip
 
 
 def task(graph: Graph) -> None:

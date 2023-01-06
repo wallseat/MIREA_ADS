@@ -1277,5 +1277,5 @@ requests = "*"
 
 [metadata]
 lock-version = "2.0"
-python-versions = "^3.10"
-content-hash = "6c8ebce13450e1aa6fae0fe3ad4bc1777832c68eab5aa66fd0dfb9181ad16632"
+python-versions = ">=3.10,<3.11"
+content-hash = "94915dc3c779e75896e81c21bc4f8ee89c0df466ede94df19bfdf9ebc8078afd"

@@ -20,8 +20,8 @@ def task(graph: Graph) -> None:
                         continue
 
                     if adj_matrix[i][j]:
-                        distance = adj_matrix[i][j] + distance_matrix[i][j]
-                        distance_matrix[i][j] = distance
+                        distance = adj_matrix[i][j] + distance_matrix[v][i]
+                        distance_matrix[v][j] = distance
 
                         queue.append(j)
                         visited.add(j)
