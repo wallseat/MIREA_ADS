@@ -7,22 +7,18 @@ def task(graph: Graph) -> None:
         n = len(adj_matrix)
         cycles = []
 
-        def _bfs(v: int) -> List[T_PATH]:
-            queue = [(v, [v])]
-            visited = set()
+        def _dfs(path_stack: T_PATH) -> List[T_PATH]:
+            v = path_stack[-1]
 
-            while queue:
-                i, path = queue.pop(0)
-                for j in range(n):
-                    if adj_matrix[i][j]:
-                        if j == v:
-                            cycles.append(path + [j])
-                        elif j not in visited:
-                            queue.append((j, path + [j]))
-                            visited.add(j)
+            for i in range(n):
+                if adj_matrix[v][i]:
+                    if i == path_stack[0]:
+                        cycles.append([*path_stack, i])
+                    elif i not in path_stack:
+                        _dfs([*path_stack, i])
 
         for i in range(n):
-            _bfs(i)
+            _dfs([i])
 
         return cycles
 
