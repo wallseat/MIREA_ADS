@@ -252,7 +252,7 @@ if __name__ == "__main__":
     import sys
 
     def print_usage():
-        print(f"Использование: {sys.argv[0]} [ИМЯ_ФАЙЛА] <режим>")
+        print(f"Использование: {sys.argv[0]} [ПУТЬ_ДО_ФАЙЛА_С_ГРАФОМ] [РЕЖИМ]")
         print(
             "Режимы:\n"
             "\texample - загружает граф и выводит его компоненты и матрицу смежности\n"
@@ -278,7 +278,7 @@ if __name__ == "__main__":
             print("Вершины графа:\n" + "\n".join(str(v) for v in graph.vertices))
             print("Матрица смежности:\n" + "\n".join(str(row) for row in graph.to_adj_matrix()))
         case "task":
-            pass
+            pass  # TASK_EXECUTION
 
         case _:
             print_usage()
