@@ -630,15 +630,15 @@ def create_tree_task(task_num: int) -> Path:
 
         tree_report = DocxTemplate(tree_folder / "randomized_bst_report.docx")
 
-        if (normalized_task_num - 20) % 15 <= 4:  # Список сыновей
+        if (sub_task_num - 20) % 15 <= 4:  # Список сыновей
             tree_code = read_abc_file(tree_folder / "child_list_randomized_bst.py")
             tree_realization = "Список сыновей"
 
-        elif (normalized_task_num - 20) % 15 <= 9:  # Левый сын, правый брат (указатели)
+        elif (sub_task_num - 20) % 15 <= 9:  # Левый сын, правый брат (указатели)
             tree_code = read_abc_file(tree_folder / "left_right_pointer_randomized_bst.py")
             tree_realization = "Левый сын, правый брат (указатели)"
 
-        elif (normalized_task_num - 20) % 15 <= 14:  # Левый сын, правый брат (таблица, массив)
+        elif (sub_task_num - 20) % 15 <= 14:  # Левый сын, правый брат (таблица, массив)
             tree_code = read_abc_file(tree_folder / "left_right_table_randomized_bst.py")
             tree_realization = "Левый сын, правый брат (таблица, массив)"
 
