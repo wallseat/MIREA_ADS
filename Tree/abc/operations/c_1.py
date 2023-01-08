@@ -23,9 +23,9 @@ if __name__ == "__main__":
     from itertools import chain
     from random import randint
 
-    tree_a = TREE__[int]()
-    tree_b = TREE__[int]()
-    tree_c = TREE__[int]()
+    tree_a = TREE__()
+    tree_b = TREE__()
+    tree_c = TREE__()
 
     for _ in range(20):
         value = randint(-99, 99)

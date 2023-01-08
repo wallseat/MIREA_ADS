@@ -43,7 +43,7 @@ def upload_to_yd(disk: yadisk.YaDisk, task_type: TaskType, task_set: List[int]) 
             elif task_type == TaskType.LINEAR:
                 task_folder_path = create_linear_task(task_no)
             elif task_type == TaskType.GRAPH:
-                task_folder_path = create_graph_task(task_no, raise_not_full=True)
+                task_folder_path = create_graph_task(task_no)
 
             lab_name = task_type.get_task_prefix().capitalize()
 
@@ -89,7 +89,7 @@ if __name__ == "__main__":
         for file in TEMP_PATH.iterdir():
             file.unlink()
 
-    WORKERS_NUM = os.cpu_count() // 2
+    WORKERS_NUM = os.cpu_count()
     TOTAL_TASKS = 100
 
     tasks = []

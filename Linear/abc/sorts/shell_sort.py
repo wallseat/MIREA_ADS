@@ -1,8 +1,8 @@
-from Linear.abc.ICollection import VT, Collection, seek, swap
+from Linear.abc.ICollection import Collection, seek, swap
 
 
 # $DEF
-def shell_sort(collection: Collection[VT]) -> Collection[VT]:  # $CX_PUSH: 1$
+def shell_sort(collection: Collection) -> Collection:  # $CX_PUSH: 1$
     last_index = collection.size - 1  # $CX_EXPR: 3$
     step = collection.size // 2  # $CX_EXPR: 3$
     while step > 0:  # $CX_PUSH: log(n)$

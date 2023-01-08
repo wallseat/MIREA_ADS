@@ -22,8 +22,8 @@ if __name__ == "__main__":
     # $А = A ⋂ B$
     from random import randint
 
-    tree_a = TREE__[int]()
-    tree_b = TREE__[int]()
+    tree_a = TREE__()
+    tree_b = TREE__()
 
     for _ in range(20):
         value = randint(-99, 99)

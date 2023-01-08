@@ -1,24 +1,23 @@
 # $Collection: Stack$
 # $DEF
-from typing import Generic, List, TypeVar
+from numbers import Real
+from typing import List
 
-VT = TypeVar("VT")
 
-
-class Stack(Generic[VT]):
-    _stack: List[VT]
+class Stack:
+    _stack: List
     _n_op: int
 
     def __init__(self) -> None:
         self._stack = []
         self._n_op = 0
 
-    def push(self, el: VT) -> None:  # $CX_DEF: 2$
+    def push(self, el: Real) -> None:  # $CX_DEF: 2$
         self._stack.insert(0, el)  # 2
 
         self._n_op += 2
 
-    def pop(self) -> VT:  # $CX_DEF: 5$
+    def pop(self) -> Real:  # $CX_DEF: 5$
         assert not self.empty, "Can't pop from empty queue!"  # 2
 
         el = self._stack.pop(0)  #  3
@@ -40,14 +39,14 @@ class Stack(Generic[VT]):
         return len(self._stack)
 
     @property
-    def top(self) -> VT:  # 3
+    def top(self) -> Real:  # 3
         assert not self.empty, "Can't get top from empty stack!"  # 2
 
         return self._stack[0]
 
 
-def print_stack(stack: Stack[VT]) -> None:
-    buffer = Stack[VT]()
+def print_stack(stack: Stack) -> None:
+    buffer = Stack()
 
     elements = []
     for _ in range(stack.size):
@@ -61,10 +60,10 @@ def print_stack(stack: Stack[VT]) -> None:
         stack.push(buffer.pop())
 
 
-def seek(stack: Stack[VT], pos: int) -> VT:  # $CX_DEF: 14*n + 11$
+def seek(stack: Stack, pos: int) -> Real:  # $CX_DEF: 14*n + 11$
     assert pos <= stack.size and pos >= 0, "Invalid position!"  # 5
 
-    buffer = Stack[VT]()  # 2
+    buffer = Stack()  # 2
 
     for _ in range(pos):  # n * (
         buffer.push(stack.pop())  # 7
@@ -81,10 +80,10 @@ def seek(stack: Stack[VT], pos: int) -> VT:  # $CX_DEF: 14*n + 11$
     return el
 
 
-def push_by_pos(stack: Stack[VT], el: VT, pos: int) -> None:  # $CX_DEF: 14*n + 9$
+def push_by_pos(stack: Stack, el: Real, pos: int) -> None:  # $CX_DEF: 14*n + 9$
     assert pos <= stack.size and pos >= 0, "Invalid position!"  # 5
 
-    buffer = Stack[VT]()  # 2
+    buffer = Stack()  # 2
 
     for _ in range(pos):  # n * (
         buffer.push(stack.pop())  # 7
@@ -99,10 +98,10 @@ def push_by_pos(stack: Stack[VT], el: VT, pos: int) -> None:  # $CX_DEF: 14*n + 
     stack._n_op += buffer.n_op
 
 
-def pop_by_pos(stack: Stack[VT], pos: int) -> VT:  # $CX_DEF: 14*n + 12$
+def pop_by_pos(stack: Stack, pos: int) -> Real:  # $CX_DEF: 14*n + 12$
     assert pos <= stack.size and pos >= 0, "Invalid position!"  # 5
 
-    buffer = Stack[VT]()  # 2
+    buffer = Stack()  # 2
 
     for _ in range(pos):  # n * (
         buffer.push(stack.pop())  # 7
@@ -119,12 +118,12 @@ def pop_by_pos(stack: Stack[VT], pos: int) -> VT:  # $CX_DEF: 14*n + 12$
     return el
 
 
-def push_front(stack: Stack[VT], el: VT) -> None:  # $CX_DEF: 2$
+def push_front(stack: Stack, el: Real) -> None:  # $CX_DEF: 2$
     stack.push(el)  # 2
 
 
-def push_back(stack: Stack[VT], el: VT) -> None:  # $CX_DEF: 14*n + 4$
-    buffer = Stack[VT]()  # 2
+def push_back(stack: Stack, el: Real) -> None:  # $CX_DEF: 14*n + 4$
+    buffer = Stack()  # 2
 
     while not stack.empty:  # n * (
         buffer.push(stack.pop())  # 7
@@ -137,12 +136,12 @@ def push_back(stack: Stack[VT], el: VT) -> None:  # $CX_DEF: 14*n + 4$
     # ) = 7n
 
 
-def pop_front(stack: Stack[VT]) -> VT:  # $CX_DEF: 5$
+def pop_front(stack: Stack) -> Real:  # $CX_DEF: 5$
     return stack.pop()  # 5
 
 
-def pop_back(stack: Stack[VT]) -> VT:  # $CX_DEF: 14*n + 7$
-    buffer = Stack[VT]()  # 2
+def pop_back(stack: Stack) -> Real:  # $CX_DEF: 14*n + 7$
+    buffer = Stack()  # 2
 
     while not stack.empty:  # n * (
         buffer.push(stack.pop())  # 7
@@ -157,15 +156,15 @@ def pop_back(stack: Stack[VT]) -> VT:  # $CX_DEF: 14*n + 7$
     return el
 
 
-def swap(stack: Stack[VT], pos1: int, pos2: int) -> None:  # $CX_DEF: 56*n + 42$
+def swap(stack: Stack, pos1: int, pos2: int) -> None:  # $CX_DEF: 56*n + 42$
     temp = pop_by_pos(stack, pos1)  #  14n + 12
     push_by_pos(stack, pop_by_pos(stack, pos2 - 1), pos1)  # 28n + 21
     push_by_pos(stack, temp, pos2)  # 14n + 9
 
 
-def partition(stack: Stack[VT], l: int = 0, r: int = -1) -> Stack[VT]:  # $CX_DEF: 16*n + 27$
-    slice_stack = Stack[VT]()  # 2
-    buffer = Stack[VT]()  # 2
+def partition(stack: Stack, l: int = 0, r: int = -1) -> Stack:  # $CX_DEF: 16*n + 27$
+    slice_stack = Stack()  # 2
+    buffer = Stack()  # 2
 
     if r == -1:  # 1
         r = stack.size - 1  # 3
@@ -191,7 +190,7 @@ from random import randint  # ignore: E402
 
 import pytest  # ignore: E402
 
-Collection = Stack[int]
+Collection = Stack
 
 
 @pytest.fixture

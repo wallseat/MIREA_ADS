@@ -395,6 +395,24 @@ def create_graph_task(task_num: int) -> Path:
 
         return "\n".join(lines[start:end])
 
+    def read_graph_definition_loader(file_path: Path) -> str:
+        lines = file_path.read_text().splitlines()
+        start = 0
+        end = 0
+
+        for i, line in enumerate(lines):
+            if "# START" in line:
+                start = i + 1
+                continue
+            if "# END" in line:
+                end = i
+                break
+
+        if start == 0 or end == 0:
+            raise ValueError("Неправильный формат файла решения")
+
+        return "\n".join(lines[start:end])
+
     task_type = TaskType.GRAPH
     normalized_task_num = task_num - 1
 
@@ -473,41 +491,52 @@ def create_graph_task(task_num: int) -> Path:
 
     # Создание файла описания графа по заданию
     matrix_converters = graph_abc_folder / "matrix_converters"
+    graph_loaders = graph_abc_folder / "graph_definition_loaders"
     definition_theories = graph_abc_folder / "definition_theory_template"
     match graph_definition:
         case "adj_matrix":
-            matrix_converter = matrix_converters / "adj_m_to_adj_m.py"
+            matrix_converter = None
+            graph_loader = graph_loaders / "adj_matrix.py"
             definition_theory = definition_theories / "adj_matrix.docx"
             graph_definition_type = "Матрица смежности"
 
         case "inc_matrix":
             matrix_converter = matrix_converters / "adj_m_to_inc_m.py"
+            graph_loader = graph_loaders / "inc_matrix.py"
             definition_theory = definition_theories / "inc_matrix.docx"
             graph_definition_type = "Матрица инцидентности"
 
         case "adj_list":
             matrix_converter = matrix_converters / "adj_m_to_adj_list.py"
+            graph_loader = graph_loaders / "adj_list.py"
             definition_theory = definition_theories / "adj_list.docx"
             graph_definition_type = "Список смежности"
 
         case "edge_list":
             matrix_converter = matrix_converters / "adj_m_to_edge_list.py"
+            graph_loader = graph_loaders / "edge_list.py"
             definition_theory = definition_theories / "edge_list.docx"
             graph_definition_type = "Список дуг"
 
-    graph_definition_file = task_py_file.parent / "graph_definition.json"
+    graph_definition_file = task_py_file.parent / "graph_definition.txt"
 
-    if err := get_exec_out(matrix_converter, args=[str(task_matrix_txt), str(graph_definition_file)]):
-        raise RuntimeError(f"Ошибка при конвертации матрицы варианта {task_num}.\n{err}")
+    if matrix_converter:
+        if err := get_exec_out(matrix_converter, args=[str(task_matrix_txt), str(graph_definition_file)]):
+            raise RuntimeError(f"Ошибка при конвертации матрицы варианта {task_num}.\n{err}")
+    else:
+        shutil.copy(task_matrix_txt, graph_definition_file)
 
     shutil.copy(task_graph_png, task_py_file.parent / "graph.png")
     shutil.copy(graph_readme_file, task_py_file.parent / "README.md")
+
+    # Плучаем код загрузчика
+    graph_definition_loader_code = read_graph_definition_loader(graph_loader)
 
     # Формируем решение задачи
     task_solve_code = read_task_solve(task_solve_file)
 
     code = (
-        graph_class_code
+        graph_class_code.replace("        pass  # LOADER", indent(graph_definition_loader_code, "    "))
         + "\n"
         + task_solve_code
         + "\n"

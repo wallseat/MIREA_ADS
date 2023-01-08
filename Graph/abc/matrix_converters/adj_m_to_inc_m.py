@@ -1,6 +1,3 @@
-import json
-
-
 def load_adj_m(file_path: str):
     with open(file_path, "r") as f:
         matrix = []
@@ -19,7 +16,7 @@ def save_as_inc_m(matrix: list[list[int]], file_path: str):
     inc_matrix = []
 
     for i, v in enumerate(matrix):
-        for j, e in enumerate(v):
+        for j, _ in enumerate(v):
             inc = [0] * dim
             if i > j:
                 continue
@@ -31,14 +28,11 @@ def save_as_inc_m(matrix: list[list[int]], file_path: str):
                 inc_matrix.append(inc)
 
     with open(file_path, "w") as f:
-        json.dump(
-            {
-                "dim": len(matrix),
-                "format": "inc_matrix",
-                "data": [[inc_matrix[i][j] for i in range(len(inc_matrix))] for j in range(dim)],
-            },
-            f,
-        )
+        f.write(str(dim))
+        f.write("\n")
+        for j in range(dim):
+            f.write(" ".join([str(inc_matrix[i][j]) for i in range(len(inc_matrix))]))
+            f.write("\n")
 
 
 if __name__ == "__main__":

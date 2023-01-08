@@ -1,8 +1,8 @@
-from Linear.abc.ICollection import VT, Collection, seek, swap
+from Linear.abc.ICollection import Collection, seek, swap
 
 
 # $DEF
-def selection_sort(collection: Collection[VT]) -> Collection[VT]:  # $CX_PUSH: 1$
+def selection_sort(collection: Collection) -> Collection:  # $CX_PUSH: 1$
     for start_pos in range(collection.size):  # $CX_PUSH: n$
         min_el_pos = start_pos  # 1
         min_el = seek(collection, min_el_pos)  # $CX_EXPR: seek + 1$

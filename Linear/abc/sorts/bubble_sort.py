@@ -1,8 +1,8 @@
-from Linear.abc.ICollection import VT, Collection, seek, swap
+from Linear.abc.ICollection import Collection, seek, swap
 
 
 # $DEF
-def bubble_sort(collection: Collection[VT]) -> Collection[VT]:  # $CX_PUSH: 1$
+def bubble_sort(collection: Collection) -> Collection:  # $CX_PUSH: 1$
     for i in range(collection.size):  # $CX_PUSH: n$
         for j in range(i, collection.size):  # $CX_PUSH: (n - 1) / 3$
             if seek(collection, i) > seek(collection, j):  # $CX_EXPR: seek + seek + 1$

@@ -1,5 +1,4 @@
-import json
-from typing import Dict, List, Optional, Tuple
+from typing import Dict, List, Optional, Tuple  # noqa: F401w
 
 T_ADJ_MATRIX = List[List[int]]
 T_PATH = List[int]
@@ -7,18 +6,16 @@ T_PATH = List[int]
 
 class Vertex:
     _index: int
-    label: str
 
-    def __init__(self, index: int, label: Optional[str] = ""):
+    def __init__(self, index: int) -> None:
         self._index = index
-        self.label = label
 
     @property
     def index(self) -> int:
         return self._index
 
     def __repr__(self):
-        return f"Vertex[i: {self._index}, label: {self.label}]"
+        return f"Vertex[i: {self._index}]"
 
 
 class Edge:
@@ -50,96 +47,8 @@ class Graph:
         for i in range(dim):
             self._vertices.append(Vertex(i))
 
-    def _load_adj_matrix(self, data: List[List[int]], dim: int) -> None:
-        self._init_vertices(dim)
-        for i, vertex in enumerate(data):
-            for j, edge_len in enumerate(vertex):
-                if edge_len > 0:
-                    self.add_e(i, j, edge_len)
-
-    def _load_adj_list(self, data: List[List[int]], dim: int) -> None:
-        self._init_vertices(dim)
-
-        for i, adj in enumerate(data):
-            for j in adj:
-                self.add_e(i, j, 1)
-
-    def _load_edge_list(self, data: List[List[int]], dim: int) -> None:
-        self._init_vertices(dim)
-
-        for edge in data:
-            if len(edge) == 3:
-                v1, v2, edge_len = edge
-            else:
-                v1, v2, edge_len = *edge, 1
-
-            self.add_e(v1, v2, edge_len)
-
-    def _load_inc_matrix(self, data: List[List[int]], dim: int) -> None:
-        self._init_vertices(dim)
-
-        transposed_data = list(zip(*data))  # транспонирование
-
-        for edge in transposed_data:
-            v1 = None
-            v2 = None
-            v1_v2_len = 0
-            v2_v1_len = 0
-            for j in range(dim):
-                if edge[j] != 0 and v1 is None:
-                    v1 = j
-                    v1_v2_len = edge[j]
-                elif edge[j] != 0 and v2 is None:
-                    v2 = j
-                    v2_v1_len = edge[j]
-                    break
-
-            if v1_v2_len > 0:
-                self.add_e(v1, v2, v1_v2_len)
-
-            if v2_v1_len > 0:
-                self.add_e(v2, v1, v2_v1_len)
-
-    def _load_labels(self, labels: Dict[str, str]) -> None:
-        for index, label in labels.items():
-            index = int(index)
-            self._vertices[index].label = label
-
     def load(self, filename: str) -> None:
-        with open(filename, "r", encoding="utf8") as f:
-            graph_json: dict = json.load(f)
-
-        _format = graph_json.get("format", None)
-        if _format is None:
-            raise Exception("Не указан формат для задания графа! Смотри документацию!")
-
-        _dim: Optional[str] = graph_json.get("dim", None)
-        if _dim is None or not isinstance(_dim, int):
-            raise Exception("Не укаказан/верный размер графа! Смотри документацию!")
-
-        _data: Optional[List[List[int]]] = graph_json.get("data", None)
-        if _data is None:
-            raise Exception("Не заданны данные для построения графа! Смотри документацию!")
-
-        _labels: Optional[Dict[str, str]] = graph_json.get("labels", None)
-
-        if _format == "adj_matrix":
-            self._load_adj_matrix(_data, _dim)
-
-        elif _format == "adj_list":
-            self._load_adj_list(_data, _dim)
-
-        elif _format == "edge_list":
-            self._load_edge_list(_data, _dim)
-
-        elif _format == "inc_matrix":
-            self._load_inc_matrix(_data, _dim)
-
-        else:
-            raise Exception("Неизвестный формат задания графа! Смотри документацию!")
-
-        if _labels:
-            self._load_labels(_labels)
+        pass  # LOADER
 
     def first(self, v: int) -> None | int:
         for edge in self._edges:

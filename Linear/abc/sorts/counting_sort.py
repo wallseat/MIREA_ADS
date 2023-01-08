@@ -1,12 +1,12 @@
-from Linear.abc.ICollection import VT, Collection, push_back, seek
+from Linear.abc.ICollection import Collection, push_back, seek
 
 
 # $DEF
-def counting_sort(collection: Collection[VT]) -> Collection[VT]:  # $CX_PUSH: 1$
+def counting_sort(collection: Collection) -> Collection:  # $CX_PUSH: 1$
     max_ = seek(collection, 0)  # $CX_EXPR: seek$
     min_ = max_  # $CX_EXPR: 1$
 
-    buffer = Collection[VT]()  # $CX_EXPR: 1$
+    buffer = Collection()  # $CX_EXPR: 1$
 
     while not collection.empty:  # $CX_PUSH: n$
         el = collection.pop()  # $CX_EXPR: Collection__pop$

@@ -1,12 +1,11 @@
 # $Collection: Queue$
 # $DEF
-from typing import Generic, List, TypeVar
+from numbers import Real
+from typing import List
 
-VT = TypeVar("VT")
 
-
-class Queue(Generic[VT]):
-    _queue: List[VT]
+class Queue:
+    _queue: List
     _array_size: int
 
     _bias: int
@@ -21,7 +20,7 @@ class Queue(Generic[VT]):
         self._n_op = 0
         self._bias = 0
 
-    def push(self, value: VT) -> None:  # $CX_DEF: 13$
+    def push(self, value: Real) -> None:  # $CX_DEF: 13$
         if self._size == self._array_size:  # 3
             self._queue += [0] * self._array_size  # 3
             self._array_size *= 2  # 2
@@ -31,7 +30,7 @@ class Queue(Generic[VT]):
 
         self._n_op += 13
 
-    def pop(self) -> VT:  # $CX_DEF: 14$
+    def pop(self) -> Real:  # $CX_DEF: 14$
         assert not self.empty, "Can't pop from empty queue!"  # 2
 
         el = self._queue[self._bias]  # 4
@@ -51,7 +50,7 @@ class Queue(Generic[VT]):
         return self._size
 
     @property
-    def tail(self) -> VT:  # 10
+    def tail(self) -> Real:  # 10
         assert not self.empty, "Can't get head from empty dequeue!"  # 2
 
         self._n_op += 10
@@ -59,7 +58,7 @@ class Queue(Generic[VT]):
         return self._queue[(self._size - 1 + self._bias) % self._max_size]
 
     @property
-    def head(self) -> VT:  # 5
+    def head(self) -> Real:  # 5
         assert not self.empty, "Can't get tail from empty dequeue!"  # 2
 
         self._n_op += 5
@@ -71,7 +70,7 @@ class Queue(Generic[VT]):
         return self._n_op
 
 
-def print_queue(queue: Queue[VT]):
+def print_queue(queue: Queue):
     elements = []
     for _ in range(queue.size):
         el = queue.pop()
@@ -81,11 +80,11 @@ def print_queue(queue: Queue[VT]):
     print("Queue[" + ", ".join(map(str, elements)) + "]")
 
 
-def rotate(queue: Queue[VT]) -> None:  # 27
+def rotate(queue: Queue) -> None:  # 27
     queue.push(queue.pop())  # 27
 
 
-def seek(queue: Queue[VT], pos: int) -> VT:  # $CX_DEF: 54*n + 32$
+def seek(queue: Queue, pos: int) -> Real:  # $CX_DEF: 54*n + 32$
     assert pos <= queue.size and pos >= 0, "Invalid position!"  # 5
 
     for _ in range(pos):  # n * (
@@ -102,7 +101,7 @@ def seek(queue: Queue[VT], pos: int) -> VT:  # $CX_DEF: 54*n + 32$
     return el
 
 
-def pop_by_pos(queue: Queue[VT], pos: int) -> VT:  # $CX_DEF: 54*n + 19$
+def pop_by_pos(queue: Queue, pos: int) -> Real:  # $CX_DEF: 54*n + 19$
     assert pos <= queue.size and pos >= 0, "Invalid position!"  # 5
 
     for _ in range(pos):  # n * (
@@ -118,7 +117,7 @@ def pop_by_pos(queue: Queue[VT], pos: int) -> VT:  # $CX_DEF: 54*n + 19$
     return el
 
 
-def push_by_pos(queue: Queue[VT], el: VT, pos: int) -> None:  # $CX_DEF: 54*n + 18$
+def push_by_pos(queue: Queue, el: Real, pos: int) -> None:  # $CX_DEF: 54*n + 18$
     assert pos <= queue.size and pos >= 0, "Invalid position!"  # 5
 
     for _ in range(pos):  # n * (
@@ -132,36 +131,36 @@ def push_by_pos(queue: Queue[VT], el: VT, pos: int) -> None:  # $CX_DEF: 54*n + 
     # ) = 27n
 
 
-def push_back(queue: Queue[VT], el: VT) -> None:  # $CX_DEF: 13$
+def push_back(queue: Queue, el: Real) -> None:  # $CX_DEF: 13$
     queue.push(el)  # 13
 
 
-def push_front(queue: Queue[VT], el: VT) -> None:  # $CX_DEF: 27*n + 13$
+def push_front(queue: Queue, el: Real) -> None:  # $CX_DEF: 27*n + 13$
     queue.push(el)  # 13
     for _ in range(queue.size - 1):  # n * (
         rotate(queue)  # 27
     # ) = 27n
 
 
-def pop_back(queue: Queue[VT]) -> VT:  # $CX_DEF: 27*n + 14$
+def pop_back(queue: Queue) -> Real:  # $CX_DEF: 27*n + 14$
     for _ in range(queue.size - 1):  # n * (
         rotate(queue)  # 27
     # ) = 27n
     return queue.pop()  # 14
 
 
-def pop_front(queue: Queue[VT]) -> VT:  # $CX_DEF: 14$
+def pop_front(queue: Queue) -> Real:  # $CX_DEF: 14$
     return queue.pop()  # 14
 
 
-def swap(queue: Queue[VT], pos1: int, pos2: int) -> None:  #  $CX_DEF: 216*n + 74$
+def swap(queue: Queue, pos1: int, pos2: int) -> None:  #  $CX_DEF: 216*n + 74$
     temp = pop_by_pos(queue, pos1)  # 54n + 19
     push_by_pos(queue, pop_by_pos(queue, pos2 - 1), pos1)  # 108n + 37
     push_by_pos(queue, temp, pos2)  # 54n + 18
 
 
-def partition(queue: Queue[VT], l: int = 0, r: int = -1) -> Queue[VT]:  # $CX_DEF: 99*n + 6$
-    buff = Queue[VT]()  # 2
+def partition(queue: Queue, l: int = 0, r: int = -1) -> Queue:  # $CX_DEF: 99*n + 6$
+    buff = Queue()  # 2
 
     if r == -1:  # 1
         r = queue.size - 1  # 3
@@ -187,7 +186,7 @@ from random import randint  # ignore: E402
 
 import pytest  # ignore: E402
 
-Collection = Queue[int]
+Collection = Queue
 
 
 @pytest.fixture

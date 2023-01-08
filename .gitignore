@@ -26,3 +26,8 @@ Tree/*
 !Tree/README.md
 !Tree/tree_tasks.pdf
 !Tree/pages
+
+Graph/*
+!Graph/abc
+!Graph/graph_tasks.pdf
+!Graph/README.md

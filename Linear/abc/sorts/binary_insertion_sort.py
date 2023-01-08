@@ -1,8 +1,8 @@
-from Linear.abc.ICollection import VT, Collection, pop_by_pos, push_by_pos, seek
+from Linear.abc.ICollection import Collection, pop_by_pos, push_by_pos, seek
 
 
 # $DEF
-def binary_insertion_sort(collection: Collection[VT]) -> Collection[VT]:  # $CX_PUSH: 1$
+def binary_insertion_sort(collection: Collection) -> Collection:  # $CX_PUSH: 1$
     for i in range(1, collection.size):  # $CX_PUSH: n$
         el = pop_by_pos(collection, i)  # $CX_EXPR: pop_by_pos$
         l = 0  # $CX_EXPR: 1$

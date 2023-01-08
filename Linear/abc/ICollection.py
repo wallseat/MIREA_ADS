@@ -1,16 +1,13 @@
 from numbers import Real
-from typing import Generic, TypeVar
-
-VT = TypeVar("VT", bound=Real)
 
 
-class Collection(Generic[VT]):
+class Collection:
     _n_op: int
 
-    def push(self, value: VT) -> None:  # Не гарантирует порядок
+    def push(self, value: Real) -> None:  # Не гарантирует порядок
         ...
 
-    def pop(self) -> VT:  # Не гарантирует порядок
+    def pop(self) -> Real:  # Не гарантирует порядок
         ...
 
     @property
@@ -26,37 +23,37 @@ class Collection(Generic[VT]):
         ...
 
 
-def pop_by_pos(collection: Collection[VT], pos: int) -> VT:
+def pop_by_pos(collection: Collection[Real], pos: int) -> Real:
     ...
 
 
-def push_by_pos(collection: Collection[VT], el: VT, pos: int) -> None:
+def push_by_pos(collection: Collection[Real], el: Real, pos: int) -> None:
     ...
 
 
-def swap(collection: Collection[VT], pos1: int, pos2: int) -> None:
+def swap(collection: Collection[Real], pos1: int, pos2: int) -> None:
     ...
 
 
-def seek(collection: Collection[VT], i: int) -> VT:
+def seek(collection: Collection[Real], i: int) -> Real:
     ...
 
 
-def push_front(collection: Collection[VT], el: VT) -> None:
+def push_front(collection: Collection[Real], el: Real) -> None:
     ...
 
 
-def pop_front(collection: Collection[VT]) -> VT:
+def pop_front(collection: Collection[Real]) -> Real:
     ...
 
 
-def push_back(collection: Collection[VT], el: VT) -> None:
+def push_back(collection: Collection[Real], el: Real) -> None:
     ...
 
 
-def pop_back(collection: Collection[VT]) -> VT:
+def pop_back(collection: Collection[Real]) -> Real:
     ...
 
 
-def partition(collection: Collection[VT], l: int, r: int) -> Collection[VT]:
+def partition(collection: Collection[Real], l: int, r: int) -> Collection[Real]:
     ...

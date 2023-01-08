@@ -1,25 +1,24 @@
 # $Collection: Dequeue$
 # $DEF
-from typing import Generic, List, Optional, TypeVar
+from numbers import Real
+from typing import List, Optional
 
-VT = TypeVar("VT")
 
-
-class Node(Generic[VT]):
-    value: VT
+class Node:
+    value: Real
     next: Optional["Node"] = None
     prev: Optional["Node"] = None
 
-    def __init__(self, value: VT):
+    def __init__(self, value: Real):
         self.value = value
 
     def __repr__(self) -> str:
         return str(self.value)
 
 
-class Dequeue(Generic[VT]):
-    _head: Optional[Node[VT]]
-    _tail: Optional[Node[VT]]
+class Dequeue:
+    _head: Optional[Node]
+    _tail: Optional[Node]
     _size: int
     _n_op: int
 
@@ -29,8 +28,8 @@ class Dequeue(Generic[VT]):
         self._size = 0
         self._n_op = 0
 
-    def push_back(self, value: VT) -> None:  # 11
-        node = Node[VT](value)  # 2
+    def push_back(self, value: Real) -> None:  # 11
+        node = Node(value)  # 2
 
         if self.empty:  # 2
             self._head = node  # 2
@@ -49,8 +48,8 @@ class Dequeue(Generic[VT]):
 
         self._n_op += 1
 
-    def push_front(self, value: VT) -> None:  # 11
-        node = Node[VT](value)
+    def push_front(self, value: Real) -> None:  # 11
+        node = Node(value)
 
         if self.empty:  # 2
             self._head = node  # 2
@@ -69,7 +68,7 @@ class Dequeue(Generic[VT]):
 
         self._n_op += 1
 
-    def pop_back(self) -> VT:  # 14
+    def pop_back(self) -> Real:  # 14
         assert not self.empty, "Can't pop from empty dequeue!"  # 2
 
         node = self._tail  # 2
@@ -88,7 +87,7 @@ class Dequeue(Generic[VT]):
 
         return node.value
 
-    def pop_front(self) -> VT:  # 14
+    def pop_front(self) -> Real:  # 14
         assert not self.empty, "Can't pop from empty dequeue!"  # 2
 
         node = self._head  # 2
@@ -108,10 +107,10 @@ class Dequeue(Generic[VT]):
 
         return node.value
 
-    def push(self, value: VT) -> None:  # $CX_DEF: 11$
+    def push(self, value: Real) -> None:  # $CX_DEF: 11$
         self.push_back(value)
 
-    def pop(self) -> VT:  # $CX_DEF: 14$
+    def pop(self) -> Real:  # $CX_DEF: 14$
         return self.pop_front()
 
     @property
@@ -119,13 +118,13 @@ class Dequeue(Generic[VT]):
         return self._size
 
     @property
-    def head(self) -> VT:  # 4
+    def head(self) -> Real:  # 4
         assert not self.empty, "Can't get head from empty dequeue!"  # 2
 
         return self._head.value
 
     @property
-    def tail(self) -> VT:  # 4
+    def tail(self) -> Real:  # 4
         assert not self.empty, "Can't get tail from empty dequeue!"  # 2
 
         return self._tail.value
@@ -139,7 +138,7 @@ class Dequeue(Generic[VT]):
         return self._size == 0
 
 
-def print_dequeue(dequeue: Dequeue[VT]) -> None:
+def print_dequeue(dequeue: Dequeue) -> None:
     elements = []
     for _ in range(dequeue.size):
         elements.append(dequeue.head)
@@ -148,15 +147,15 @@ def print_dequeue(dequeue: Dequeue[VT]) -> None:
     print("Dequeue[" + ", ".join(map(str, elements)) + "]")
 
 
-def rotate_left(dequeue: Dequeue[VT]) -> None:  # 25
+def rotate_left(dequeue: Dequeue) -> None:  # 25
     dequeue.push_back(dequeue.pop_front())
 
 
-def rotate_right(dequeue: Dequeue[VT]) -> None:  # 25
+def rotate_right(dequeue: Dequeue) -> None:  # 25
     dequeue.push_front(dequeue.pop_back())
 
 
-def seek(dequeue: Dequeue[VT], pos: int) -> VT:  # $CX_DEF: 26*n + 12$
+def seek(dequeue: Dequeue, pos: int) -> Real:  # $CX_DEF: 26*n + 12$
     assert pos <= dequeue.size and pos >= 0, "Invalid position!"  # 5
 
     if pos >= dequeue.size // 2:  # 3
@@ -186,7 +185,7 @@ def seek(dequeue: Dequeue[VT], pos: int) -> VT:  # $CX_DEF: 26*n + 12$
         return node
 
 
-def push_by_pos(dequeue: Dequeue[VT], el: VT, pos: int) -> None:  # $CX_DEF: 26*n + 19$
+def push_by_pos(dequeue: Dequeue, el: Real, pos: int) -> None:  # $CX_DEF: 26*n + 19$
     assert pos <= dequeue.size and pos >= 0, "Invalid position!"  # 5
 
     if pos == dequeue.size:  # 2
@@ -217,7 +216,7 @@ def push_by_pos(dequeue: Dequeue[VT], el: VT, pos: int) -> None:  # $CX_DEF: 26*
                 rotate_left(dequeue)
 
 
-def pop_by_pos(dequeue: Dequeue[VT], pos: int) -> VT:  # $CX_DEF: 26*n + 23$
+def pop_by_pos(dequeue: Dequeue, pos: int) -> Real:  # $CX_DEF: 26*n + 23$
     assert pos <= dequeue.size and pos >= 0, "Invalid position!"  # 5
 
     if pos == dequeue.size - 1:  # 3
@@ -250,19 +249,19 @@ def pop_by_pos(dequeue: Dequeue[VT], pos: int) -> VT:  # $CX_DEF: 26*n + 23$
         return v
 
 
-def push_front(dequeue: Dequeue[VT], el: VT) -> None:  # $CX_DEF: 11$
+def push_front(dequeue: Dequeue, el: Real) -> None:  # $CX_DEF: 11$
     dequeue.push_front(el)
 
 
-def push_back(dequeue: Dequeue[VT], el: VT) -> None:  # $CX_DEF: 11$
+def push_back(dequeue: Dequeue, el: Real) -> None:  # $CX_DEF: 11$
     dequeue.push_back(el)
 
 
-def pop_front(dequeue: Dequeue[VT]) -> VT:  # $CX_DEF: 12$
+def pop_front(dequeue: Dequeue) -> Real:  # $CX_DEF: 12$
     return dequeue.pop_front()
 
 
-def pop_back(dequeue: Dequeue[VT]) -> VT:  # $CX_DEF: 12$
+def pop_back(dequeue: Dequeue) -> Real:  # $CX_DEF: 12$
     return dequeue.pop_back()
 
 
@@ -318,8 +317,8 @@ def swap(dequeue: Dequeue, pos1: int, pos2: int) -> None:  # $CX_DEF: 52*n + 62$
             rotate_left(dequeue)
 
 
-def partition(dequeue: Dequeue[VT], l: int = 0, r: int = -1) -> Dequeue[VT]:  # $CX_DEF: 88*n + 6$
-    buffer = Dequeue[VT]()  # 2
+def partition(dequeue: Dequeue, l: int = 0, r: int = -1) -> Dequeue:  # $CX_DEF: 88*n + 6$
+    buffer = Dequeue()  # 2
 
     if r == -1:  # 1
         r = dequeue.size - 1  # 3
@@ -346,7 +345,7 @@ from random import randint  # ignore: E402
 
 import pytest  # ignore: E402
 
-Collection = Dequeue[int]
+Collection = Dequeue
 
 
 @pytest.fixture

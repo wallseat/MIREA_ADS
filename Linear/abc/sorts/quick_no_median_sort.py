@@ -1,8 +1,8 @@
-from Linear.abc.ICollection import VT, Collection, seek, swap
+from Linear.abc.ICollection import Collection, seek, swap
 
 
 # $DEF
-def quick_sort(collection: Collection[VT]) -> Collection[VT]:  # $CX_PUSH: 1$
+def quick_sort(collection: Collection) -> Collection:  # $CX_PUSH: 1$
     def _quick_sort(left: int, right: int) -> None:  # $CX_PUSH: 1$
         i = left  # $CX_EXPR: 1$
         j = right  # $CX_EXPR: 1$

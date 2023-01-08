@@ -1,14 +1,13 @@
-from typing import Generic, List, Optional, TypeVar
+from numbers import Real
+from typing import List, Optional
 
-VT = TypeVar("VT")
 
-
-class Node(Generic[VT]):
-    value: VT
+class Node:
+    value: Real
 
     height: int
 
-    def __init__(self, key: VT):
+    def __init__(self, key: Real):
         self.value = key
         self.height = 1
 
@@ -16,8 +15,8 @@ class Node(Generic[VT]):
         return str(self.value)
 
 
-class AVL_BST(Generic[VT]):
-    _nodes: List[Node[VT]]
+class AVL_BST:
+    _nodes: List[Node]
     _left: List[int]
     _right: List[int]
     _root: int
@@ -31,7 +30,7 @@ class AVL_BST(Generic[VT]):
     def empty(self) -> bool:
         return self._root is None
 
-    def _find(self, root: int, value: VT) -> Optional[int]:
+    def _find(self, root: int, value: Real) -> Optional[int]:
         if root is None or self._nodes[root].value == value:
             return root
 
@@ -41,14 +40,14 @@ class AVL_BST(Generic[VT]):
         else:
             return self._find(self._right[root], value)
 
-    def find(self, value: VT) -> Optional[Node[VT]]:
+    def find(self, value: Real) -> Optional[Node]:
         index = self._find(self._root, value)
         return self._nodes[index] if index is not None else None
 
     def _fix_height(self, root: int):
         self._nodes[root].height = 1 + max(self._height(self._left[root]), self._height(self._right[root]))
 
-    def _insert(self, root: int, value: VT) -> int:
+    def _insert(self, root: int, value: Real) -> int:
         if root is None:
             self._nodes.append(Node(value))
             self._left.append(None)
@@ -83,7 +82,7 @@ class AVL_BST(Generic[VT]):
 
         return root
 
-    def _remove(self, root: int, value: VT) -> int:
+    def _remove(self, root: int, value: Real) -> int:
         if root is None:
             return root
 
@@ -172,13 +171,13 @@ class AVL_BST(Generic[VT]):
     def height(self) -> int:
         return self._height(self._root)
 
-    def insert(self, value: VT):
+    def insert(self, value: Real):
         self._root = self._insert(self._root, value)
 
-    def remove(self, value: VT):
+    def remove(self, value: Real):
         self._root = self._remove(self._root, value)
 
-    def _traverse_inorder(self, root: int, nodes_list: List[Node[VT]]):
+    def _traverse_inorder(self, root: int, nodes_list: List[Node]):
         if root is not None:
             self._traverse_inorder(self._left[root], nodes_list)
             nodes_list.append(self._nodes[root])
@@ -186,10 +185,10 @@ class AVL_BST(Generic[VT]):
 
         return nodes_list
 
-    def traverse_inorder(self) -> List[Node[VT]]:
+    def traverse_inorder(self) -> List[Node]:
         return self._traverse_inorder(self._root, [])
 
-    def _traverse_postorder(self, root: int, nodes_list: List[Node[VT]]):
+    def _traverse_postorder(self, root: int, nodes_list: List[Node]):
         if root is not None:
             self._traverse_postorder(self._left[root], nodes_list)
             self._traverse_postorder(self._right[root], nodes_list)
@@ -197,10 +196,10 @@ class AVL_BST(Generic[VT]):
 
         return nodes_list
 
-    def traverse_postorder(self) -> List[Node[VT]]:
+    def traverse_postorder(self) -> List[Node]:
         return self._traverse_postorder(self._root, [])
 
-    def _traverse_preorder(self, root: Node[VT], nodes_list: List[Node[VT]]):
+    def _traverse_preorder(self, root: Node, nodes_list: List[Node]):
         if root is not None:
             nodes_list.append(self._nodes[root])
             self._traverse_preorder(self._left[root], nodes_list)
@@ -208,7 +207,7 @@ class AVL_BST(Generic[VT]):
 
         return nodes_list
 
-    def traverse_preorder(self) -> List[Node[VT]]:
+    def traverse_preorder(self) -> List[Node]:
         return self._traverse_preorder(self._root, [])
 
 

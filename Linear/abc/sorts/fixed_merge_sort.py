@@ -1,9 +1,9 @@
-from Linear.abc.ICollection import VT, Collection, partition, pop_front, push_back, seek
+from Linear.abc.ICollection import Collection, partition, pop_front, push_back, seek
 
 
 # $DEF
-def merge(left: Collection[VT], right: Collection[VT]) -> Collection[VT]:  # $CX_DEF $CX_PUSH: 1$
-    result = Collection[VT]()  # $CX_EXPR: 1$
+def merge(left: Collection, right: Collection) -> Collection:  # $CX_DEF $CX_PUSH: 1$
+    result = Collection()  # $CX_EXPR: 1$
 
     while not left.empty and not right.empty:  # $CX_PUSH: n$
         if seek(left, 0) <= seek(right, 0):  # $CX_EXPR: seek + seek + 1$
@@ -25,7 +25,7 @@ def merge(left: Collection[VT], right: Collection[VT]) -> Collection[VT]:  # $CX
     # $CX_POP_BACK
 
 
-def merge_sort(collection: Collection[VT]) -> Collection[VT]:  # $CX_PUSH: 1$
+def merge_sort(collection: Collection) -> Collection:  # $CX_PUSH: 1$
     if collection.size <= 1:  # $CX_EXPR: 2$
         return collection
 
