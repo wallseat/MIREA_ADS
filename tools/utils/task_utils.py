@@ -376,7 +376,7 @@ def create_linear_task(task_num: int) -> Path:
     return task_file.parent
 
 
-def create_graph_task(task_num: int, raise_not_full: bool = False) -> None:
+def create_graph_task(task_num: int) -> Path:
     def read_task_solve(file_path: Path) -> str:
         lines = file_path.read_text().splitlines()
         start = 0
@@ -418,14 +418,7 @@ def create_graph_task(task_num: int, raise_not_full: bool = False) -> None:
                 task_path[int(comp)] = folder
 
     if task_num not in task_path:
-        task_py_file = create_task_file(task_type, task_num)
-        task_py_file.write_text(graph_class_code + "\n" + graph_runner_code)
-
-        if raise_not_full:
-            raise ValueError(f"Решение задачи для варианта {task_num} не было найдено")
-
-        print(f"Решение задачи для варианта {task_num} не было найдено, создан пустой шаблон")
-        return
+        raise ValueError(f"Решение задачи для варианта {task_num} не было найдено")
 
     graph_definitions = {0: "adj_matrix", 1: "inc_matrix", 2: "adj_list", 3: "edge_list"}
 
