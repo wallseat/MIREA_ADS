@@ -23,37 +23,37 @@ class Collection:
         ...
 
 
-def pop_by_pos(collection: Collection[Real], pos: int) -> Real:
+def pop_by_pos(collection: Collection, pos: int) -> Real:
     ...
 
 
-def push_by_pos(collection: Collection[Real], el: Real, pos: int) -> None:
+def push_by_pos(collection: Collection, el: Real, pos: int) -> None:
     ...
 
 
-def swap(collection: Collection[Real], pos1: int, pos2: int) -> None:
+def swap(collection: Collection, pos1: int, pos2: int) -> None:
     ...
 
 
-def seek(collection: Collection[Real], i: int) -> Real:
+def seek(collection: Collection, i: int) -> Real:
     ...
 
 
-def push_front(collection: Collection[Real], el: Real) -> None:
+def push_front(collection: Collection, el: Real) -> None:
     ...
 
 
-def pop_front(collection: Collection[Real]) -> Real:
+def pop_front(collection: Collection) -> Real:
     ...
 
 
-def push_back(collection: Collection[Real], el: Real) -> None:
+def push_back(collection: Collection, el: Real) -> None:
     ...
 
 
-def pop_back(collection: Collection[Real]) -> Real:
+def pop_back(collection: Collection) -> Real:
     ...
 
 
-def partition(collection: Collection[Real], l: int, r: int) -> Collection[Real]:
+def partition(collection: Collection, l: int, r: int) -> Collection:
     ...

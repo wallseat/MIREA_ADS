@@ -1,11 +1,11 @@
-from ICollection import VT, Collection
+from ICollection import Collection
 
 
-def print_collection(collection: Collection[VT]) -> None:
+def print_collection(collection: Collection) -> None:
     ...
 
 
-def some_sort(collection: Collection[VT]) -> Collection[VT]:
+def some_sort(collection: Collection) -> Collection:
     ...
 
 
@@ -20,7 +20,7 @@ if __name__ == "__main__":
         exit(1)
 
     if sys.argv[1] == "example":
-        collection = Collection[int]()
+        collection = Collection()
         for _ in range(20):
             collection.push(randint(-10000, 10000))
 
@@ -32,7 +32,7 @@ if __name__ == "__main__":
         step = None
 
         for test_num in range(1, tests + 1):
-            collection = Collection[int]()
+            collection = Collection()
 
             for _ in range(test_num * step):
                 collection.push(randint(-10000, 10000))

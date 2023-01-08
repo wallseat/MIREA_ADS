@@ -32,7 +32,9 @@ def upload_to_yd(disk: yadisk.YaDisk, task_type: TaskType, task_set: List[int]) 
         try:
             zip_path = None
             task_folder_path = None
-            lab_name = None
+            lab_name = task_type.get_task_prefix().capitalize()
+
+            print(f"Generating {lab_name}_{task_no}")
 
             path = task_type.get_base_path() / str(task_no)
             if path.exists():
@@ -45,7 +47,7 @@ def upload_to_yd(disk: yadisk.YaDisk, task_type: TaskType, task_set: List[int]) 
             elif task_type == TaskType.GRAPH:
                 task_folder_path = create_graph_task(task_no)
 
-            lab_name = task_type.get_task_prefix().capitalize()
+            print(f"Generated {lab_name}_{task_no}")
 
             zip_name = f"{lab_name}_{task_no}.zip"
             zip_path = TEMP_PATH / zip_name
